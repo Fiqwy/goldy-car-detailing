@@ -235,11 +235,9 @@ export const content = Object.freeze({
     body: "Mobile detailing means Gracie's set up to handle the awkward stuff — Hiace vans, work utes, motorhomes, caravans, horsefloats, dog-grooming rigs. She comes to your yard, paddock or property. Bigger vehicles take longer; the standard never changes.",
     cta: { label: "Get a price for my rig", href: "#configurator" },
     photos: [
-      { src: "assets/vans-rvs/06-ram-horsefloat.jpg",         alt: "Ram pulled up to a white horsefloat — country setting",     featured: true, span: 2 },
+      { src: "assets/vans-rvs/06-ram-horsefloat.jpg",         alt: "Ram pulled up to a white horsefloat — country setting", featured: true, span: 2 },
       { src: "assets/vans-rvs/01-hiace-silver.jpg",           alt: "Toyota Hiace — Silver Package refresher" },
       { src: "assets/vans-rvs/03-hiace-interior-cleaned.jpg", alt: "Empty Hiace interior — deep-cleaned, road-ready" },
-      { src: "assets/vans-rvs/06-ram-horsefloat.jpg",         alt: "Ram + horsefloat — wider view" },
-      { src: "assets/vans-rvs/05-green-jeep-7hr.jpg",         alt: "Green Jeep Wrangler — 7-hour full clean" },
       { src: "assets/vans-rvs/04-dog-grooming-van.jpg",       alt: "Dog-grooming work van — de-dog-haired + deep interior" },
       { src: "assets/vans-rvs/02-hiace-wheel-macro.jpg",      alt: "Hiace wheel macro — bronze rim spec shot" }
     ]
