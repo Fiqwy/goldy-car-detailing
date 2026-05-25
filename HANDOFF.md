@@ -25,13 +25,16 @@ Plain `open index.html` will fail — `script.js` is an ES module and the browse
 | `assets/_source.json` | Provenance for every visual asset. Marks placeholder vs real vs Higgsfield. |
 | `assets/hero/*.svg` | Placeholder hero + 3 morph plates. **Swap to real .webp once IG pull is done.** |
 
-## What's placeholder vs real (UPDATED 2026-05-25 after IG scrape)
+## What's placeholder vs real (UPDATED 2026-05-25 — v2 carousel walk + dedicated sections)
 
 | Bucket | Status |
 |---|---|
 | Hero before / after | ✅ Real (ig-17 HSV Clubsport). Same file for both layers — CSS filter on `.hero-bg img` dims the before, `.hero-bg .after-layer img` brightens the after, so the clip-path reveal reads as a real transformation of the same car. |
 | Hero "morph plates" (matte/satin/mirror) | SVG placeholders. Higgsfield image-to-image in Phase 2. |
-| Gallery (15 tiles) | ✅ All real (BMW X3, Audi SQ7, Discovery, Range Rover, Raptor, R34 Skyline ×2, Porsche ×2, Cayenne, Denali, '59 Chevy Apache, Santa Fe sale, Musso sale, Commodore $250, gooseneck sale). |
+| Gallery (~25 tiles, HD 1440px+) | ✅ All real. Daily drivers / Special builds / Sale-ready rows. Includes carousel-slide bonus shots (Blue Audi Q7, Discovery rear, Porsche Cayenne, Ranger Raptor golden hour, Red R34 Skyline, R32 GTR, '59 Chevy Apache warehouse, HSV Clubsport, XR6 golden hour, green Jeep, Santa Fe bush, red Commodore SV, Porsche Macan). |
+| **Bikes dedicated section** | ✅ NEW. 3 real photos — Harley Road Glide (front, featured), Harley (rear), Suzuki VZ1500. Lives at `#bikes`. |
+| **Caravans / Vans / Horsefloats section** | ✅ NEW. 6 real photos — Ram + horsefloat (featured), Hiace Silver Package, Hiace interior cleaned, dog van, green Jeep 7-hr, Hiace wheel macro. Lives at `#caravans`. |
+| **Behind the Detail strip** | ✅ NEW. 4 real photos — Goldy branded number plate, business-card handover, SQ7 wheel + red calipers, BMW X3 interior. Shows craft + brand. Lives at `#behind`. |
 | Process (5 step images) | ✅ All real: work rig → Suzuki mid-wash → Ford XR6 transformation → Harley protected → Porsche immaculate. |
 | Founder portrait | ✅ Real (ig-02 "I Know Ball" — Gracie's hands/feet on a steering wheel + footwell shot). |
 | Phone | ✅ Real (0427 798 045 — pulled verbatim from her captions). |
@@ -40,6 +43,14 @@ Plain `open index.html` will fail — `script.js` is an ES module and the browse
 | Testimonials | One honest placeholder badge — Phase-2 swap with real IG comment screenshots or Google reviews. |
 | OG image | ✅ Real (ig-17). |
 | Suburb hero | ✅ Real (uses hero/after.jpg). |
+
+## v2 carousel-walk gains (2026-05-25 PM)
+Walked all 27 known post URLs through Playwright. **Findings:**
+- Original 27 grid scrape = 311–1080px thumbnails. Walking individual posts → **HD originals (1440–3072px)**. All 25 in-gallery photos upgraded.
+- 21 additional **carousel slides** unlocked (slides 2-5 of multi-image posts). Used to populate the new Bikes, Caravans, and Behind-the-Detail sections.
+- Key finds: real Harley Road Glide front-on (`new-05`), real **Ram + white horsefloat** (`new-03`), real **Goldy-branded number plate macro** (`new-21`), SsangYong handover with **business cards on steering wheel wrap** (`new-10`), Hiace interior cleaned + wheel macro (`new-16`, `new-07`).
+- **No Higgsfield needed** — every photo on the site is now Gracie's real work.
+- IG's logged-out "More posts from goldycardetailing" carousel didn't expose any of her #28-84 posts. To pull the remaining 57 (which include more Motorhomes / Horsefloats content from her highlights), Nicholas runs `assets/_source/ig/SCRAPE-SNIPPET.md` in his logged-in Chrome — 60 seconds, drops a JSON file, I process it.
 
 ## What we learned from the IG scrape
 - 84 posts · 200 followers · 14 following
