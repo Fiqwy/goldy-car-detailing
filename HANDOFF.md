@@ -25,17 +25,45 @@ Plain `open index.html` will fail — `script.js` is an ES module and the browse
 | `assets/_source.json` | Provenance for every visual asset. Marks placeholder vs real vs Higgsfield. |
 | `assets/hero/*.svg` | Placeholder hero + 3 morph plates. **Swap to real .webp once IG pull is done.** |
 
-## What's placeholder vs real
+## What's placeholder vs real (UPDATED 2026-05-25 after IG scrape)
 
 | Bucket | Status |
 |---|---|
-| Hero before / after | SVG gradient placeholders. Swap to real photos from Gracie's IG ASAP. |
-| Hero "morph plates" (matte/satin/mirror) | SVG placeholders. Higgsfield image-to-image when ready. |
-| Gallery (15 tiles) | All paths reference `.webp` that don't exist yet. `onerror` handler hides broken tiles. Drop real files in `assets/gallery/`. |
-| Process (5 step images) | Same as gallery — paths reference `.webp` not on disk yet. |
-| Founder portrait | Placeholder block in `about-portrait` until real photo dropped at `assets/founder/gracie.webp`. |
-| Phone / email / ABN | Placeholders — every `// CONFIRM` in `content.js` needs Gracie sign-off. |
-| Testimonials | One honest "placeholder" badge — replaces with real quotes when Gracie shares them. |
+| Hero before / after | ✅ Real (ig-17 HSV Clubsport). Same file for both layers — CSS filter on `.hero-bg img` dims the before, `.hero-bg .after-layer img` brightens the after, so the clip-path reveal reads as a real transformation of the same car. |
+| Hero "morph plates" (matte/satin/mirror) | SVG placeholders. Higgsfield image-to-image in Phase 2. |
+| Gallery (15 tiles) | ✅ All real (BMW X3, Audi SQ7, Discovery, Range Rover, Raptor, R34 Skyline ×2, Porsche ×2, Cayenne, Denali, '59 Chevy Apache, Santa Fe sale, Musso sale, Commodore $250, gooseneck sale). |
+| Process (5 step images) | ✅ All real: work rig → Suzuki mid-wash → Ford XR6 transformation → Harley protected → Porsche immaculate. |
+| Founder portrait | ✅ Real (ig-02 "I Know Ball" — Gracie's hands/feet on a steering wheel + footwell shot). |
+| Phone | ✅ Real (0427 798 045 — pulled verbatim from her captions). |
+| Email / ABN | CONFIRM — `goldycardetailing@gmail.com` guessed. |
+| Packages | ✅ Real names: Silver / Gold 🥇 / Diamond 💎 (matched verbatim to her IG captions). Prices still need her sign-off. |
+| Testimonials | One honest placeholder badge — Phase-2 swap with real IG comment screenshots or Google reviews. |
+| OG image | ✅ Real (ig-17). |
+| Suburb hero | ✅ Real (uses hero/after.jpg). |
+
+## What we learned from the IG scrape
+- 84 posts · 200 followers · 14 following
+- **Female-owned** (#womeninbusiness #womeninmalefields)
+- Story highlights: B&A (before/after), Reviews, Insights, Horsefloats, Motorhomes
+- **Maintenance Plan** = recurring revenue offer (fortnightly / monthly / 5-weekly). Limited spots. Porsche on her 5-week plan, Skyline on fortnightly, 1959 Chevy on maintenance list.
+- Real price anchor: **$250** for a Holden Commodore full interior reset (seats/carpets shampooed, plastics cleaned + coated, leather conditioned, vacuum, windows like new, foamy wash)
+- Voice: "We don't gate keep around here", educational posts (rain damage care)
+- Service breadth: cars, 4WDs, vans, motorbikes (Harley + Suzuki VZ1500), motorhomes, caravans, horsefloats, dog-grooming vans
+- Vehicles in portfolio: Porsche ×3, BMW X3, Audi SQ7 ×2, Range Rover/Discovery, R34 Skyline ×2, Ford XR6, Ford Raptor, GMC Denali, HSV Clubsport, 1959 Chevy Apache, Hyundai Santa Fe, SsangYong Musso, Holden Commodore, Suzuki VZ1500, Harley-Davidson, Toyota Hiace Van, gooseneck towing rig
+
+## Open with Nicholas before show-and-tell
+1. Email — `goldycardetailing@gmail.com` guess in `content.js`. Confirm or replace.
+2. ABN — empty. Add if she wants it in the footer.
+3. Pricing floors — Silver $189 / Gold $329 / Diamond $549 / Maintenance Plan $129. Calibrated against her real $250 Commodore reference. Confirm.
+4. Founder bio — written from public signals. Refine with real story.
+5. Real testimonials — pull from her IG comment screenshots or Google reviews (with permission).
+6. Maintenance Plan UI — currently described in copy + FAQ. Wire a real recurring booking option in Phase 2.
+
+## Raw scrape artifacts
+- `assets/_source/ig/ig-01.jpg` through `ig-27.jpg` — all originals from the public profile
+- `assets/_source/ig/_provenance.json` — full caption + dimensions + sourceUrlBase for every photo
+- `assets/_source/ig/SCRAPE-SNIPPET.md` — DevTools snippet for getting all 84 posts via your logged-in Chrome (Phase 2)
+- `scripts/import-ig.py` — companion script that processes the snippet's JSON dump
 
 ## Decisions made (matches the planning doc)
 
