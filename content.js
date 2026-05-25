@@ -169,31 +169,50 @@ export const content = Object.freeze({
     }
   ],
 
-  // 15 cars, all real, all from her IG portfolio
+  // 22 photos, all real, all from her IG portfolio (1440×1920 high-res)
   gallery: [
-    { src: "assets/gallery/01-bmw-x3.jpg",                alt: "BMW X3 — Gold Package finish",                              category: "daily"   },
-    { src: "assets/gallery/02-audi-sq7.jpg",              alt: "2019 Audi SQ7 — basic wash & interior",                     category: "daily"   },
-    { src: "assets/gallery/03-discovery.jpg",             alt: "Land Rover Discovery — full detail, showroom glow",         category: "daily"   },
-    { src: "assets/gallery/04-audi.jpg",                  alt: "Audi — shine restored",                                     category: "daily"   },
-    { src: "assets/gallery/05-ford-raptor.jpg",           alt: "Ford Raptor — quick interior + exterior detail",            category: "daily"   },
-    { src: "assets/gallery/06-r34-skyline.jpg",           alt: "Nissan R34 Skyline — on maintenance list",                  category: "special" },
-    { src: "assets/gallery/07-skyline-fortnightly.jpg",   alt: "Skyline — fortnightly maintenance plan",                    category: "special" },
-    { src: "assets/gallery/08-porsche.jpg",               alt: "Porsche — 3rd detail, looks newer every time",              category: "special" },
+    // ---- DAILY DRIVERS (5) ----
+    { src: "assets/gallery/01-bmw-x3.jpg",                alt: "BMW X3 — Gold 🥇 Package finish",                            category: "daily"  },
+    { src: "assets/gallery/02-audi-sq7.jpg",              alt: "2019 Audi SQ7 — basic wash & interior",                     category: "daily"  },
+    { src: "assets/gallery/03-discovery.jpg",             alt: "Land Rover Discovery — full detail, showroom glow",         category: "daily"  },
+    { src: "assets/gallery/04-audi.jpg",                  alt: "Audi — shine restored",                                     category: "daily"  },
+    { src: "assets/gallery/05-ford-raptor.jpg",           alt: "Ford Raptor — quick interior + exterior detail",            category: "daily"  },
+
+    // ---- SPECIAL BUILDS (8) ----
+    { src: "assets/gallery/06-r34-skyline.jpg",           alt: "Nissan R34 Skyline — on the maintenance list",              category: "special" },
+    { src: "assets/gallery/07-skyline-fortnightly.jpg",   alt: "Skyline — fortnightly maintenance plan client",             category: "special" },
+    { src: "assets/gallery/08-porsche.jpg",               alt: "Porsche — 3rd detail, newer every time",                    category: "special" },
     { src: "assets/gallery/09-porsche-cayenne.jpg",       alt: "Porsche Cayenne — basic detail, anything but basic finish", category: "special" },
-    { src: "assets/gallery/10-denali.jpg",                alt: "GMC Denali — full care, premium results",                   category: "special" },
+    { src: "assets/gallery/10-denali.jpg",                alt: "GMC Denali — full premium detail",                          category: "special" },
     { src: "assets/gallery/11-chevy-apache-1959.jpg",     alt: "1959 Chevrolet Apache — classic ute, showroom maintenance", category: "special" },
-    { src: "assets/gallery/12-santa-fe-sale.jpg",         alt: "Hyundai Santa Fe — Diamond Package, sale-ready",            category: "resale"  },
+    { src: "assets/gallery/24-hsv-clubsport-side.jpg",    alt: "Red HSV Clubsport — side profile after detail",             category: "special" },
+    { src: "assets/gallery/25-white-4wd.jpg",             alt: "White off-road 4WD — finished and ready for the next trip", category: "special" },
+
+    // ---- SALE-READY (4) ----
+    { src: "assets/gallery/12-santa-fe-sale.jpg",         alt: "Hyundai Santa Fe — Diamond 💎 Package, sale-ready",          category: "resale"  },
     { src: "assets/gallery/13-musso-sale.jpg",            alt: "SsangYong Musso — sale detail package",                     category: "resale"  },
-    { src: "assets/gallery/14-commodore-250.jpg",         alt: "Holden Commodore — $250 full reset",                        category: "resale"  },
-    { src: "assets/gallery/15-gooseneck-sale.jpg",        alt: "Gooseneck towing package — full makeover for sale",         category: "resale"  }
+    { src: "assets/gallery/14-commodore-250.jpg",         alt: "Holden Commodore — $250 full interior reset",               category: "resale"  },
+    { src: "assets/gallery/15-gooseneck-sale.jpg",        alt: "Gooseneck towing rig — full makeover for sale",             category: "resale"  },
+
+    // ---- BIKES (4) — Harley touring + side + Road Glide + Suzuki ----
+    { src: "assets/gallery/16-harley-touring.jpg",        alt: "Harley-Davidson touring — rear 3/4 after detail",           category: "bikes"   },
+    { src: "assets/gallery/17-harley-side.jpg",           alt: "Harley-Davidson — side profile, polished + protected",      category: "bikes"   },
+    { src: "assets/gallery/23-harley-roadglide.jpg",      alt: "Harley-Davidson Road Glide — black + brown leather, detailed", category: "bikes"   },
+    { src: "assets/gallery/18-suzuki-vz1500.jpg",         alt: "Suzuki VZ1500 — mid-wash, motorcycle detail",               category: "bikes"   },
+
+    // ---- VANS & TRADES (4) — RVs in her IG highlights (login-walled, see HANDOFF) ----
+    { src: "assets/gallery/19-hiace-van.jpg",             alt: "Toyota Hiace Van — Silver Package refresher",               category: "vans"    },
+    { src: "assets/gallery/20-hiace-wheel-detail.jpg",    alt: "Hiace wheel + bodywork detail — bronze rim, white panel",   category: "vans"    },
+    { src: "assets/gallery/21-dog-van.jpg",               alt: "Dog-grooming work van — de-dog-hairing + deep interior",    category: "vans"    },
+    { src: "assets/gallery/22-work-ute.jpg",              alt: "Work ute — even work utes deserve some love",               category: "vans"    }
   ],
 
   galleryCategories: [
     { id: "daily",   label: "Daily drivers" },
     { id: "special", label: "Special builds" },
     { id: "resale",  label: "Sale-ready" },
-    { id: "bikes",   label: "Bikes" },        // ig-11 Suzuki + ig-22 Harley both detailed
-    { id: "vans",    label: "Vans & RVs" }   // ig-18 Hiace + ig-23 dog van + motorhome highlight
+    { id: "bikes",   label: "Bikes" },           // ✓ 3 real photos placed
+    { id: "vans",    label: "Vans & trades" }    // ✓ 4 real photos placed. Caravans/motorhomes in her IG "Motorhomes" story highlight (login required) — Phase 2 swap.
   ],
 
   // SHIP HONEST — one placeholder marked as such until Gracie shares real screenshots.
