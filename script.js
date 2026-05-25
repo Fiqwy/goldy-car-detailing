@@ -42,12 +42,15 @@ function renderHero() {
 }
 
 function renderTrust() {
-  $('#trustRow').innerHTML = content.trustStrip.map(t => `
+  $('#trustRow').innerHTML = content.trustStrip.map(t => {
+    const numeric = !isNaN(parseFloat(t.value)) && isFinite(t.value);
+    const countAttr = numeric ? `data-count-to="${parseFloat(t.value)}"` : '';
+    return `
     <div class="trust-cell" data-reveal>
-      <div class="trust-num" data-count-to="${parseFloat(t.value)}">${t.value}${t.suffix ? `<span class="suffix">${t.suffix}</span>` : ''}</div>
+      <div class="trust-num" ${countAttr}>${t.value}${t.suffix ? `<span class="suffix">${t.suffix}</span>` : ''}</div>
       <div class="trust-label">${t.label}</div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 function renderPackages() {

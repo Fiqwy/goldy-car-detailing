@@ -18,7 +18,8 @@ const ICONS = {
   suv:   `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 21h28"/><path d="M4 21v-7l4-5h15l5 5v7"/><circle cx="10" cy="22" r="2.4"/><circle cx="23" cy="22" r="2.4"/></svg>`,
   ute:   `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22h28"/><path d="M4 22v-6l3-6h11v6h11v6"/><circle cx="10" cy="23" r="2.4"/><circle cx="24" cy="23" r="2.4"/></svg>`,
   fourwd:`<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22h28"/><path d="M3 22v-8l4-6h18l4 6v8"/><circle cx="10" cy="23" r="2.6"/><circle cx="23" cy="23" r="2.6"/></svg>`,
-  motorhome:`<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22h28"/><rect x="3" y="8" width="23" height="14" rx="1.5"/><path d="M26 14l4 4v4h-4"/><circle cx="9" cy="23" r="2.4"/><circle cx="22" cy="23" r="2.4"/></svg>`
+  motorhome:`<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22h28"/><rect x="3" y="8" width="23" height="14" rx="1.5"/><path d="M26 14l4 4v4h-4"/><circle cx="9" cy="23" r="2.4"/><circle cx="22" cy="23" r="2.4"/></svg>`,
+  bike:     `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="22" r="5"/><circle cx="25" cy="22" r="5"/><path d="M7 22l5-12h7l4 8"/><path d="M14 10h4"/></svg>`
 };
 
 export function initConfigurator(content) {

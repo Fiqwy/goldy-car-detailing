@@ -1,32 +1,64 @@
 {
-  "_doc": "Provenance for every visual asset. Update when swapping in real photos from Gracie's IG or Higgsfield gens. All entries marked _placeholder until Nicholas swaps in real files.",
-  "_updated": "2026-05-25",
+  "_doc": "Provenance for every visual asset on the site. All photos in this manifest are real, scraped from @goldycardetailing IG (public) on 2026-05-25. Originals saved in _source/ig/ with full caption + size metadata in _source/ig/_provenance.json.",
+  "_scrape_date": "2026-05-25",
+  "_scrape_source": "https://www.instagram.com/goldycardetailing/",
+  "_scrape_notes": "27 unique photos pulled from public profile grid (logged-out, no API). IG cuts off infinite scroll for logged-out users at ~27 posts of her 84 total.",
 
   "hero": {
-    "before.webp":  { "source": "placeholder", "_placeholder": true, "_generated": false },
-    "after.webp":   { "source": "placeholder", "_placeholder": true, "_generated": false },
-    "plate-matte.webp":  { "source": "higgsfield-pending", "_placeholder": true, "_generated": true, "_brief": "Black sedan, matte/oxidised finish, low golden-hour light" },
-    "plate-satin.webp":  { "source": "higgsfield-pending", "_placeholder": true, "_generated": true, "_brief": "Same sedan, partially polished, satin reflection" },
-    "plate-mirror.webp": { "source": "higgsfield-pending", "_placeholder": true, "_generated": true, "_brief": "Same sedan, full ceramic mirror reflection, garage-light highlights" }
-  },
-
-  "gallery": {
-    "_note": "Slots 01-15. Pull from @goldycardetailing IG (logged-in download). Each entry should record post URL + capture date once real."
-  },
-
-  "process": {
-    "_note": "Slots 01-05. Best from her own work-in-progress shots. Higgsfield fallback for any she doesn't have (e.g. paint gauge close-up if she doesn't shoot tool shots)."
+    "before.jpg": { "source": "ig-17", "caption": "HSV Clubsport — fresh detail", "_filter": "dimmed via CSS for before/after illusion" },
+    "after.jpg":  { "source": "ig-17", "caption": "HSV Clubsport — fresh detail", "_filter": "vivid via CSS for before/after illusion" },
+    "plate-matte.svg":  { "source": "placeholder-svg", "_note": "Silver tier morph plate — Higgsfield replacement in Phase 2" },
+    "plate-satin.svg":  { "source": "placeholder-svg", "_note": "Gold tier morph plate — Higgsfield replacement in Phase 2" },
+    "plate-mirror.svg": { "source": "placeholder-svg", "_note": "Diamond tier morph plate — Higgsfield replacement in Phase 2" }
   },
 
   "founder": {
-    "gracie.webp": { "source": "placeholder", "_placeholder": true, "_brief": "Portrait — Gracie at work, golden hour lighting if possible. Real photo only — never AI-generate a person." }
+    "gracie.jpg": { "source": "ig-02", "caption": "I Know Ball — Gracie at work, #womeninbusiness #womeninmalefields" }
   },
 
-  "logo": {
-    "_note": "If Gracie has a logo, drop SVG here. Otherwise we ship with type-only wordmark and add logo later."
+  "process": {
+    "01-assessment.jpg": { "source": "ig-01", "caption": "Goldy's Work Rig — deep exterior detail + full chrome polish" },
+    "02-decon.jpg":      { "source": "ig-11", "caption": "Suzuki VZ1500 — mid-wash, motorcycle detailing" },
+    "03-correction.jpg": { "source": "ig-13", "caption": "Ford XR6 — full makeover from paint fade + swirls" },
+    "04-protection.jpg": { "source": "ig-22", "caption": "Harley-Davidson — restored depth, clarity, protection" },
+    "05-handover.jpg":   { "source": "ig-15", "caption": "Porsche — 2nd detail, 5-week maintenance plan" }
+  },
+
+  "gallery": {
+    "01-bmw-x3.jpg":              { "source": "ig-08", "caption": "BMW X3 — Gold 🥇 Package" },
+    "02-audi-sq7.jpg":            { "source": "ig-04", "caption": "2019 Audi SQ7 — basic wash & interior" },
+    "03-discovery.jpg":           { "source": "ig-10", "caption": "Land Rover Discovery — full detail, showroom glow" },
+    "04-audi.jpg":                { "source": "ig-19", "caption": "Audi — shine restored" },
+    "05-ford-raptor.jpg":         { "source": "ig-03", "caption": "Ford Raptor — quick interior + exterior detail" },
+    "06-r34-skyline.jpg":         { "source": "ig-12", "caption": "R34 Skyline — on maintenance list" },
+    "07-skyline-fortnightly.jpg": { "source": "ig-14", "caption": "Skyline — fortnightly maintenance plan" },
+    "08-porsche.jpg":             { "source": "ig-07", "caption": "Porsche — 3rd detail (maintenance plan)" },
+    "09-porsche-cayenne.jpg":     { "source": "ig-27", "caption": "Porsche Cayenne — basic detail, anything but basic finish" },
+    "10-denali.jpg":              { "source": "ig-21", "caption": "GMC Denali — full care" },
+    "11-chevy-apache-1959.jpg":   { "source": "ig-05", "caption": "1959 Chevrolet Apache — showroom maintenance wash & interior" },
+    "12-santa-fe-sale.jpg":       { "source": "ig-06", "caption": "Hyundai Santa Fe — Diamond 💎 Package, sale-ready" },
+    "13-musso-sale.jpg":          { "source": "ig-09", "caption": "SsangYong Musso — sale detail package" },
+    "14-commodore-250.jpg":       { "source": "ig-26", "caption": "Holden Commodore — $250 full reset" },
+    "15-gooseneck-sale.jpg":      { "source": "ig-20", "caption": "Car & gooseneck package — full makeover for sale" }
   },
 
   "og": {
-    "og-image.jpg": { "source": "placeholder", "_placeholder": true, "_brief": "1200x630, gold-on-black, wordmark + tagline. Final asset generated after hero is locked." }
+    "og-image.jpg": { "source": "ig-17", "caption": "HSV Clubsport — for social previews" }
+  },
+
+  "_unused_from_scrape": [
+    "ig-16 (rain damage education infographic — not a car shot)",
+    "ig-18 (Toyota Hiace Van — Silver Package — could rotate into vans gallery)",
+    "ig-23 (lovedogz_goldcoast dog van — could rotate in)",
+    "ig-24 (work ute — too similar to others)",
+    "ig-25 (green machine 7-hour interior — could rotate in)"
+  ],
+
+  "_intel_extracted_from_captions": {
+    "phone": "0427 798 045",
+    "packages": ["Silver Package", "Gold 🥇 Package", "Diamond 💎 Package"],
+    "services": ["Maintenance Plan (fortnightly/monthly/5-weekly, limited spots)", "Sale Detail", "Paint correction", "Ceramic coatings", "Motorcycle detailing", "Van detailing", "Motorhome detailing", "Horsefloat detailing"],
+    "personality": ["Female-owned", "Gold Coast born", "Educational (rain damage post)", "'We don't gate keep around here'", "Owner-operator", "Returning client pattern (Porsche 3rd visit, Skyline fortnightly)"],
+    "real_price_anchor": "$250 Holden Commodore full interior reset"
   }
 }
