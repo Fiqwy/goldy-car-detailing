@@ -1487,3 +1487,231 @@ body.has-cursor .cursor-glow { opacity: 1; }
   .behind-strip { grid-template-columns: 1fr 1fr; gap: 0.6rem; }
   .behind-tile figcaption { font-size: 0.72rem; padding: 1.2rem 0.7rem 0.7rem; }
 }
+
+/* =====================================================================
+   WHY GOLDY — 4-pillar differentiation
+   ===================================================================== */
+.why {
+  background: linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-card) 100%);
+}
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-top: var(--gap-inner);
+}
+.why-pillar {
+  padding: 2rem 1.6rem;
+  background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-card-2) 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  position: relative;
+  overflow: hidden;
+  transition: transform 320ms var(--ease-out), border 320ms var(--ease-out), box-shadow 320ms var(--ease-out);
+}
+.why-pillar::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(180deg, var(--gold-soft) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 320ms var(--ease-out);
+  pointer-events: none;
+}
+.why-pillar:hover {
+  transform: translateY(-4px);
+  border-color: var(--gold-line);
+  box-shadow: var(--shadow-gold);
+}
+.why-pillar:hover::before { opacity: 1; }
+.why-glyph {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--gold-soft);
+  color: var(--gold);
+  margin-bottom: 0.4rem;
+  position: relative;
+  z-index: 1;
+}
+.why-glyph svg { width: 24px; height: 24px; }
+.why-pillar-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+  position: relative;
+  z-index: 1;
+}
+.why-pillar-body {
+  font-size: 0.94rem;
+  color: var(--text-body);
+  line-height: 1.55;
+  position: relative;
+  z-index: 1;
+}
+
+/* =====================================================================
+   BEFORE / AFTER — draggable slider
+   ===================================================================== */
+.reveal {
+  background: var(--bg-deep);
+}
+.reveal-frame {
+  position: relative;
+  max-width: 1100px;
+  margin: 0 auto;
+  aspect-ratio: 16/10;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  cursor: ew-resize;
+  user-select: none;
+  background: var(--bg-elev);
+  box-shadow: var(--shadow-deep);
+  border: 1px solid var(--line);
+}
+.reveal-before,
+.reveal-after {
+  position: absolute;
+  inset: 0;
+}
+.reveal-before {
+  clip-path: inset(0 50% 0 0);
+  z-index: 2;
+  will-change: clip-path;
+}
+.reveal-before img,
+.reveal-after img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* Before = dull, dim, slightly faded — "tired paint" feel */
+.reveal-before img {
+  filter: saturate(0.45) brightness(0.55) contrast(0.85) blur(0.4px);
+}
+/* After = vivid, sharp, premium */
+.reveal-after img {
+  filter: saturate(1.15) brightness(1.05) contrast(1.08);
+}
+.reveal-tag {
+  position: absolute;
+  top: 1.2rem;
+  padding: 6px 14px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+  z-index: 3;
+  pointer-events: none;
+}
+.reveal-tag-before {
+  left: 1.2rem;
+  background: rgba(7, 9, 15, 0.7);
+  color: var(--text-muted);
+  border: 1px solid var(--line);
+}
+.reveal-tag-after {
+  right: 1.2rem;
+  background: linear-gradient(95deg, var(--gold-warm), var(--gold-deep));
+  color: #1A1208;
+}
+.reveal-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  z-index: 4;
+  transform: translateX(-50%);
+  cursor: ew-resize;
+  outline: none;
+  will-change: left;
+}
+.reveal-handle:focus-visible .reveal-handle-knob {
+  box-shadow: 0 0 0 3px var(--gold), 0 0 30px rgba(224, 184, 114, 0.6);
+}
+.reveal-handle-line {
+  position: absolute;
+  inset: 0 50% 0 50%;
+  width: 2px;
+  margin-left: -1px;
+  background: linear-gradient(180deg, transparent 0%, var(--gold) 8%, var(--gold) 92%, transparent 100%);
+  box-shadow: 0 0 12px rgba(224, 184, 114, 0.5);
+}
+.reveal-handle-knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold-warm), var(--gold), var(--gold-deep));
+  color: #1A1208;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 16px 40px -10px rgba(224, 184, 114, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+}
+.reveal-handle:hover .reveal-handle-knob,
+.reveal-handle.is-grabbing .reveal-handle-knob {
+  transform: translate(-50%, -50%) scale(1.08);
+  box-shadow: 0 22px 60px -10px rgba(224, 184, 114, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.reveal-handle.is-grabbing { cursor: grabbing; }
+.reveal-handle-hint {
+  position: absolute;
+  top: calc(50% + 42px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: rgba(7, 9, 15, 0.6);
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--gold-line);
+  backdrop-filter: blur(6px);
+  opacity: 1;
+  transition: opacity 300ms var(--ease-out);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.reveal-frame.is-dragged .reveal-handle-hint { opacity: 0; }
+
+/* =====================================================================
+   RESPONSIVE — pillars stack, slider keeps 4:3 on mobile
+   ===================================================================== */
+@media (max-width: 1024px) {
+  .why-grid { grid-template-columns: 1fr 1fr; }
+  .reveal-frame { aspect-ratio: 4/3; }
+}
+@media (max-width: 640px) {
+  .why-grid { grid-template-columns: 1fr; gap: 0.7rem; }
+  .why-pillar { padding: 1.6rem 1.3rem; }
+  .reveal-frame { aspect-ratio: 1/1; }
+  .reveal-handle-knob { width: 48px; height: 48px; }
+  .reveal-tag { font-size: 0.7rem; padding: 5px 10px; top: 0.9rem; }
+  .reveal-tag-before { left: 0.9rem; }
+  .reveal-tag-after { right: 0.9rem; }
+}
+
+/* Reduced motion — slider still draggable but no auto-tease */
+@media (prefers-reduced-motion: reduce) {
+  .reveal-handle-knob { transition: none; }
+}

@@ -51,6 +51,49 @@ export const content = Object.freeze({
     { value: "FREE",label: "personalised quote · ~15 min reply" }
   ],
 
+  // 4-pillar differentiation block — beats control-detailing's "dad's love" hook
+  // by stacking the structural advantages no Gold Coast competitor can claim together.
+  whyGracie: {
+    eyebrow: "Why Goldy",
+    title: "Four reasons your last detailer can't match.",
+    pillars: [
+      {
+        glyph: "owner",
+        title: "Owner-operator",
+        body: "Every booking is Gracie. Inspection, wash, polish, coating, handover — same hands, same standard, every time. No subcontractors, no trainees, no surprises."
+      },
+      {
+        glyph: "female",
+        title: "Female-owned",
+        body: "Not a token — a difference you'll feel in the attention to interiors, the care with paint, and the respect for your space. Her IG hashtag says it: #womeninbusiness #womeninmalefields."
+      },
+      {
+        glyph: "price",
+        title: "No quote-back",
+        body: "Two taps in the price builder above gives you a real number. Other detailers hide pricing behind a form — Gracie shows it. From $189, scales with vehicle size only."
+      },
+      {
+        glyph: "mobile",
+        title: "Mobile, to you",
+        body: "Apartments, high-rises, hotel forecourts, driveways, paddocks. Fully self-contained — water + power on board. You don't move, you don't wait, you don't pick up."
+      }
+    ]
+  },
+
+  // Interactive draggable before/after slider — the visceral "show me the difference" moment
+  // Same image both sides; CSS filters make the before look dull/dim, after looks pristine.
+  // Reuses the hero HSV Clubsport shot at full resolution.
+  beforeAfter: {
+    eyebrow: "See the difference",
+    title: "Drag to reveal.",
+    body: "Before Gracie: tired paint, dull reflection, swirls catch the light. After Gracie: depth, clarity, mirror finish. Drag the handle and watch the same panel transform.",
+    image: "assets/gallery/01-bmw-x3.jpg",   // BMW X3 detail — high contrast, holds up to filter trick
+    imageAlt: "BMW X3 finish — before and after Gracie's Gold Package",
+    handleLabel: "Drag",
+    beforeLabel: "Before",
+    afterLabel: "After Goldy"
+  },
+
   // HER REAL PACKAGE NAMES from IG captions
   packages: [
     {

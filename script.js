@@ -154,6 +154,123 @@ function renderAbout() {
   $('#aboutSig').textContent = content.founder.signature;
 }
 
+function renderWhyGracie() {
+  const w = content.whyGracie;
+  if (!w) return;
+  const GLYPHS = {
+    owner:  `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="11" r="5"/><path d="M5 28c1.5-6 6-9 11-9s9.5 3 11 9"/></svg>`,
+    female: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="13" r="6"/><path d="M16 19v8"/><path d="M12 24h8"/></svg>`,
+    price:  `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 6H13a3 3 0 0 0 0 6h6a3 3 0 0 1 0 6H10"/><path d="M16 3v3M16 21v3"/></svg>`,
+    mobile: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22h26"/><path d="M5 22v-6l4-6h13l5 6v6"/><circle cx="10" cy="23" r="2.4"/><circle cx="23" cy="23" r="2.4"/><path d="M19 4l3 3-3 3M22 7H10"/></svg>`
+  };
+  $('#whyEyebrow').innerHTML = `<span class="dot"></span> ${w.eyebrow}`;
+  $('#whyTitle').textContent = w.title;
+  $('#whyGrid').innerHTML = w.pillars.map(p => `
+    <article class="why-pillar" data-reveal>
+      <span class="why-glyph">${GLYPHS[p.glyph] || ''}</span>
+      <h3 class="why-pillar-title">${p.title}</h3>
+      <p class="why-pillar-body">${p.body}</p>
+    </article>
+  `).join('');
+}
+
+function renderBeforeAfter() {
+  const b = content.beforeAfter;
+  if (!b) return;
+  $('#revealEyebrow').innerHTML = `<span class="dot"></span> ${b.eyebrow}`;
+  $('#revealTitle').textContent = b.title;
+  $('#revealBody').textContent = b.body;
+  $('#revealImgBefore').src = b.image;
+  $('#revealImgBefore').alt = b.imageAlt + ' — before';
+  $('#revealImgAfter').src = b.image;
+  $('#revealImgAfter').alt = b.imageAlt + ' — after';
+  $('#revealTagBefore').textContent = b.beforeLabel;
+  $('#revealTagAfter').textContent = b.afterLabel;
+  $('#revealHandleHint').textContent = b.handleLabel;
+  initRevealSlider();
+}
+
+function initRevealSlider() {
+  const frame  = document.getElementById('revealFrame');
+  const before = document.getElementById('revealBeforePane');
+  const handle = document.getElementById('revealHandle');
+  if (!frame || !before || !handle) return;
+
+  let pct = 50;
+  let dragging = false;
+
+  function setPct(p) {
+    pct = Math.max(0, Math.min(100, p));
+    before.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
+    handle.style.left = `${pct}%`;
+    handle.setAttribute('aria-valuenow', Math.round(pct));
+    frame.classList.toggle('is-dragged', pct < 48 || pct > 52);
+  }
+
+  function ptToPct(clientX) {
+    const r = frame.getBoundingClientRect();
+    return ((clientX - r.left) / r.width) * 100;
+  }
+
+  function onMove(e) {
+    if (!dragging) return;
+    const x = (e.touches ? e.touches[0].clientX : e.clientX);
+    setPct(ptToPct(x));
+  }
+  function onUp() {
+    dragging = false;
+    handle.classList.remove('is-grabbing');
+    document.body.style.userSelect = '';
+  }
+  function onDown(e) {
+    dragging = true;
+    handle.classList.add('is-grabbing');
+    document.body.style.userSelect = 'none';
+    const x = (e.touches ? e.touches[0].clientX : e.clientX);
+    setPct(ptToPct(x));
+    e.preventDefault();
+  }
+
+  // Mouse + touch
+  handle.addEventListener('mousedown', onDown);
+  frame.addEventListener('mousedown', onDown);
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onUp);
+  handle.addEventListener('touchstart', onDown, { passive: false });
+  frame.addEventListener('touchstart', onDown, { passive: false });
+  window.addEventListener('touchmove', onMove, { passive: true });
+  window.addEventListener('touchend', onUp);
+
+  // Keyboard accessibility
+  handle.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft')  setPct(pct - 4);
+    if (e.key === 'ArrowRight') setPct(pct + 4);
+    if (e.key === 'Home')       setPct(0);
+    if (e.key === 'End')        setPct(100);
+  });
+
+  // Auto-tease on first reveal — gentle wiggle to invite drag
+  const obs = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting && !REDUCED) {
+      // animate from 50 → 70 → 30 → 50
+      const start = performance.now();
+      const dur = 2200;
+      function tick(now) {
+        const t = Math.min(1, (now - start) / dur);
+        // Easing: sine wave with damp
+        const wave = Math.sin(t * Math.PI * 2) * (1 - t) * 22;
+        setPct(50 + wave);
+        if (t < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+      obs.disconnect();
+    }
+  }, { threshold: 0.4 });
+  obs.observe(frame);
+
+  setPct(50);
+}
+
 function renderBikesShowcase() {
   const s = content.bikesShowcase;
   if (!s) return;
@@ -325,6 +442,8 @@ renderHero();
 renderTrust();
 renderPackages();
 renderProcess();
+renderWhyGracie();
+renderBeforeAfter();
 renderGallery();
 renderBikesShowcase();
 renderVansRvsShowcase();

@@ -118,6 +118,19 @@
     <div class="divider" data-reveal></div>
 
     <!-- ============================================================
+         WHY GOLDY — 4-pillar differentiation
+         ============================================================ -->
+    <section class="why" id="why">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow" id="whyEyebrow"><span class="dot"></span></p>
+          <h2 class="split" id="whyTitle"></h2>
+        </div>
+        <div class="why-grid" id="whyGrid"></div>
+      </div>
+    </section>
+
+    <!-- ============================================================
          CONFIGURATOR — 2-step instant price
          ============================================================ -->
     <section class="configurator" id="configurator">
@@ -195,6 +208,37 @@
         <div class="process-track" id="processTrack"></div>
       </div>
     </section>
+
+    <!-- ============================================================
+         BEFORE / AFTER — draggable slider (visceral capability demo)
+         ============================================================ -->
+    <section class="reveal" id="reveal">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow" id="revealEyebrow"><span class="dot"></span></p>
+          <h2 class="split" id="revealTitle"></h2>
+          <p id="revealBody"></p>
+        </div>
+        <div class="reveal-frame" id="revealFrame" data-reveal>
+          <div class="reveal-after">
+            <img id="revealImgAfter" src="" alt="" loading="lazy">
+            <span class="reveal-tag reveal-tag-after" id="revealTagAfter">After</span>
+          </div>
+          <div class="reveal-before" id="revealBeforePane">
+            <img id="revealImgBefore" src="" alt="" loading="lazy">
+            <span class="reveal-tag reveal-tag-before" id="revealTagBefore">Before</span>
+          </div>
+          <div class="reveal-handle" id="revealHandle" role="slider" aria-label="Drag to reveal before and after" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" tabindex="0">
+            <div class="reveal-handle-line"></div>
+            <div class="reveal-handle-knob">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 3 12 9 6"/><polyline points="15 6 21 12 15 18"/></svg>
+            </div>
+            <span class="reveal-handle-hint" id="revealHandleHint">Drag</span>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="divider" data-reveal></div>
 
     <!-- ============================================================
          GALLERY — masonry + horizontal "by occasion" rail
