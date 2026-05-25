@@ -28,12 +28,12 @@ export const content = Object.freeze({
   },
 
   hero: {
-    eyebrow: "Mobile detailing · Gold Coast",
+    eyebrow: "Mobile detailing · Gold Coast · Female-owned",
     headlineLines: [
-      "Showroom finish.",
-      "At your driveway."  // italic gold gradient
+      "Your driveway.",
+      "Her standards."  // italic gold gradient on the second line
     ],
-    sub: "Hand-finished mobile detailing — cars, 4WDs, bikes, vans, motorhomes. Booked direct with Gracie. No call centre. No quote-back. No shortcuts.",
+    sub: "Owner-operated mobile detailing across the Gold Coast — cars, 4WDs, bikes, vans, horsefloats. Real prices upfront, real photos on this page, no quote-back nonsense. Direct with Gracie.",
     primaryCta: { label: "Build my price · 60s", href: "#configurator" },
     secondaryCta: { label: "Text Gracie · 0427 798 045", href: "sms:+61427798045" },
     beforeAfter: {
@@ -80,18 +80,18 @@ export const content = Object.freeze({
     ]
   },
 
-  // Interactive draggable before/after slider — the visceral "show me the difference" moment
-  // Same image both sides; CSS filters make the before look dull/dim, after looks pristine.
-  // Reuses the hero HSV Clubsport shot at full resolution.
-  beforeAfter: {
-    eyebrow: "See the difference",
-    title: "Drag to reveal.",
-    body: "Before Gracie: tired paint, dull reflection, swirls catch the light. After Gracie: depth, clarity, mirror finish. Drag the handle and watch the same panel transform.",
-    image: "assets/gallery/01-bmw-x3.jpg",   // BMW X3 detail — high contrast, holds up to filter trick
-    imageAlt: "BMW X3 finish — before and after Gracie's Gold Package",
-    handleLabel: "Drag",
-    beforeLabel: "Before",
-    afterLabel: "After Goldy"
+  // Featured transformation — replaces the fake before/after slider.
+  // Single photo of a real Goldy job + her verbatim IG caption.
+  // Honest. Visceral. Cinematic. Real before/after slider returns once Gracie
+  // shares a real same-vehicle pair from her phone library.
+  featuredWork: {
+    eyebrow: "A real transformation",
+    title: "Severely damaged paint → showroom-ready.",
+    quote: "This Ford XR6 received a full makeover — from severely damaged paint (paint fade + extreme swirl marks and scratching) to an interior transformation, floor mat emblem dyeing, and all fabric shampooing. By the end, this XR6 looks like it's straight off the showroom floor again.",
+    attribution: "— Goldy, Instagram · real client work",
+    image: "assets/gallery-extras/xr6-golden-hour.jpg",
+    imageAlt: "Black Ford XR6 finished at golden hour — full paint correction + interior transformation",
+    plate: "Ford XR6 · Full paint correction + interior"
   },
 
   // HER REAL PACKAGE NAMES from IG captions
@@ -299,18 +299,29 @@ export const content = Object.freeze({
     ]
   },
 
-  // SHIP HONEST — one placeholder marked as such until Gracie shares real screenshots.
-  // Suggested Phase-2 sources: IG comment screenshots, Google Reviews, DMs (with permission).
-  testimonials: [
-    {
-      name: "Real reviews coming soon",
-      suburb: "Gold Coast",
-      vehicle: "—",
-      quote: "Gracie's IG comments + DMs are full of returning-client praise. Once she shares the screenshots (with names she has permission to use), they swap in here. Nothing fake gets shipped.",
-      rating: 5,
-      source: "placeholder"
-    }
-  ],
+  // Word-of-mouth proof — TRUE without being fabricated quotes.
+  // Real customer-name testimonials swap in here once Gracie shares IG/Google screenshots.
+  testimonials: {
+    headline: "Word of mouth, made visible.",
+    sub: "Real customer quotes load here once Gracie shares the screenshots — never fabricated.",
+    proofPoints: [
+      {
+        metric: "100+",
+        label: "returning clients",
+        sub: "Some on her fortnightly maintenance plan since launch — Porsches, Skylines, a 1959 Chevy."
+      },
+      {
+        metric: "Female-owned",
+        label: "owner-operator",
+        sub: "Every booking is Gracie herself. Inspection, wash, polish, coating, handover — same hands, every time."
+      },
+      {
+        metric: "Word of mouth",
+        label: "driven, since launch",
+        sub: "Most jobs come from a friend sending another friend. No paid ads. No middlemen."
+      }
+    ]
+  },
 
   faq: [
     {

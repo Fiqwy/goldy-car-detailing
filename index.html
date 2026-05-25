@@ -27,6 +27,9 @@
 </head>
 <body>
 
+  <!-- Skip to main content — visible only on keyboard focus -->
+  <a href="#configurator" class="skip-link">Skip to price builder</a>
+
   <!-- ============================================================
        CINEMATIC PAGE-LOAD OVERTURE — JS removes when done
        ============================================================ -->
@@ -210,30 +213,26 @@
     </section>
 
     <!-- ============================================================
-         BEFORE / AFTER — draggable slider (visceral capability demo)
+         FEATURED TRANSFORMATION — real Goldy job + verbatim IG caption
+         (Replaces the previous CSS-filter slider — real before/after pair
+          returns here once Gracie supplies one from her phone library.)
          ============================================================ -->
-    <section class="reveal" id="reveal">
+    <section class="featured" id="featured">
       <div class="container">
-        <div class="section-head">
-          <p class="eyebrow" id="revealEyebrow"><span class="dot"></span></p>
-          <h2 class="split" id="revealTitle"></h2>
-          <p id="revealBody"></p>
-        </div>
-        <div class="reveal-frame" id="revealFrame" data-reveal>
-          <div class="reveal-after">
-            <img id="revealImgAfter" src="" alt="" loading="lazy">
-            <span class="reveal-tag reveal-tag-after" id="revealTagAfter">After</span>
-          </div>
-          <div class="reveal-before" id="revealBeforePane">
-            <img id="revealImgBefore" src="" alt="" loading="lazy">
-            <span class="reveal-tag reveal-tag-before" id="revealTagBefore">Before</span>
-          </div>
-          <div class="reveal-handle" id="revealHandle" role="slider" aria-label="Drag to reveal before and after" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" tabindex="0">
-            <div class="reveal-handle-line"></div>
-            <div class="reveal-handle-knob">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 3 12 9 6"/><polyline points="15 6 21 12 15 18"/></svg>
+        <div class="featured-grid">
+          <figure class="featured-photo" data-reveal>
+            <img id="featuredImg" src="" alt="" loading="lazy">
+            <figcaption class="featured-plate" id="featuredPlate"></figcaption>
+          </figure>
+          <div class="featured-copy" data-reveal>
+            <p class="eyebrow" id="featuredEyebrow"><span class="dot"></span></p>
+            <h2 class="split" id="featuredTitle"></h2>
+            <blockquote class="featured-quote" id="featuredQuote"></blockquote>
+            <p class="featured-attribution" id="featuredAttribution"></p>
+            <div class="featured-cta">
+              <a href="#configurator" class="btn btn-primary">Build my price <span class="arrow">→</span></a>
+              <a href="#gallery" class="btn btn-ghost">See more work</a>
             </div>
-            <span class="reveal-handle-hint" id="revealHandleHint">Drag</span>
           </div>
         </div>
       </div>

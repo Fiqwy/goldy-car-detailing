@@ -124,18 +124,23 @@ function renderGallery() {
 }
 
 function renderTestimonials() {
-  $('#tmtGrid').innerHTML = content.testimonials.map(t => `
-    <article class="tmt" data-reveal>
-      <div class="tmt-stars">${'★'.repeat(t.rating)}${'☆'.repeat(5 - t.rating)}</div>
-      <p class="tmt-quote">"${t.quote}"</p>
-      <div class="tmt-meta">
-        <span class="tmt-name">${t.name}${t.suburb ? ` · ${t.suburb}` : ''}</span>
-        ${t.source === 'placeholder'
-          ? `<span class="tmt-placeholder">Placeholder</span>`
-          : `<span class="tmt-vehicle">${t.vehicle}</span>`}
-      </div>
+  const t = content.testimonials;
+  if (!t || !t.proofPoints) return;
+  $('#tmtGrid').innerHTML = t.proofPoints.map(p => `
+    <article class="tmt tmt-proof" data-reveal>
+      <div class="tmt-metric">${p.metric}</div>
+      <div class="tmt-label">${p.label}</div>
+      <p class="tmt-sub">${p.sub}</p>
     </article>
   `).join('');
+  // Update the section head if a custom headline shipped
+  const head = document.querySelector('.testimonials .section-head');
+  if (head && t.headline) {
+    const h2 = head.querySelector('h2');
+    const p  = head.querySelector('p');
+    if (h2) h2.textContent = t.headline;
+    if (p) p.textContent = t.sub; else if (t.sub) head.insertAdjacentHTML('beforeend', `<p>${t.sub}</p>`);
+  }
 }
 
 function renderAbout() {
@@ -174,101 +179,16 @@ function renderWhyGracie() {
   `).join('');
 }
 
-function renderBeforeAfter() {
-  const b = content.beforeAfter;
-  if (!b) return;
-  $('#revealEyebrow').innerHTML = `<span class="dot"></span> ${b.eyebrow}`;
-  $('#revealTitle').textContent = b.title;
-  $('#revealBody').textContent = b.body;
-  $('#revealImgBefore').src = b.image;
-  $('#revealImgBefore').alt = b.imageAlt + ' — before';
-  $('#revealImgAfter').src = b.image;
-  $('#revealImgAfter').alt = b.imageAlt + ' — after';
-  $('#revealTagBefore').textContent = b.beforeLabel;
-  $('#revealTagAfter').textContent = b.afterLabel;
-  $('#revealHandleHint').textContent = b.handleLabel;
-  initRevealSlider();
-}
-
-function initRevealSlider() {
-  const frame  = document.getElementById('revealFrame');
-  const before = document.getElementById('revealBeforePane');
-  const handle = document.getElementById('revealHandle');
-  if (!frame || !before || !handle) return;
-
-  let pct = 50;
-  let dragging = false;
-
-  function setPct(p) {
-    pct = Math.max(0, Math.min(100, p));
-    before.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
-    handle.style.left = `${pct}%`;
-    handle.setAttribute('aria-valuenow', Math.round(pct));
-    frame.classList.toggle('is-dragged', pct < 48 || pct > 52);
-  }
-
-  function ptToPct(clientX) {
-    const r = frame.getBoundingClientRect();
-    return ((clientX - r.left) / r.width) * 100;
-  }
-
-  function onMove(e) {
-    if (!dragging) return;
-    const x = (e.touches ? e.touches[0].clientX : e.clientX);
-    setPct(ptToPct(x));
-  }
-  function onUp() {
-    dragging = false;
-    handle.classList.remove('is-grabbing');
-    document.body.style.userSelect = '';
-  }
-  function onDown(e) {
-    dragging = true;
-    handle.classList.add('is-grabbing');
-    document.body.style.userSelect = 'none';
-    const x = (e.touches ? e.touches[0].clientX : e.clientX);
-    setPct(ptToPct(x));
-    e.preventDefault();
-  }
-
-  // Mouse + touch
-  handle.addEventListener('mousedown', onDown);
-  frame.addEventListener('mousedown', onDown);
-  window.addEventListener('mousemove', onMove);
-  window.addEventListener('mouseup', onUp);
-  handle.addEventListener('touchstart', onDown, { passive: false });
-  frame.addEventListener('touchstart', onDown, { passive: false });
-  window.addEventListener('touchmove', onMove, { passive: true });
-  window.addEventListener('touchend', onUp);
-
-  // Keyboard accessibility
-  handle.addEventListener('keydown', e => {
-    if (e.key === 'ArrowLeft')  setPct(pct - 4);
-    if (e.key === 'ArrowRight') setPct(pct + 4);
-    if (e.key === 'Home')       setPct(0);
-    if (e.key === 'End')        setPct(100);
-  });
-
-  // Auto-tease on first reveal — gentle wiggle to invite drag
-  const obs = new IntersectionObserver(entries => {
-    if (entries[0].isIntersecting && !REDUCED) {
-      // animate from 50 → 70 → 30 → 50
-      const start = performance.now();
-      const dur = 2200;
-      function tick(now) {
-        const t = Math.min(1, (now - start) / dur);
-        // Easing: sine wave with damp
-        const wave = Math.sin(t * Math.PI * 2) * (1 - t) * 22;
-        setPct(50 + wave);
-        if (t < 1) requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
-      obs.disconnect();
-    }
-  }, { threshold: 0.4 });
-  obs.observe(frame);
-
-  setPct(50);
+function renderFeaturedWork() {
+  const f = content.featuredWork;
+  if (!f) return;
+  $('#featuredEyebrow').innerHTML = `<span class="dot"></span> ${f.eyebrow}`;
+  $('#featuredTitle').textContent = f.title;
+  $('#featuredQuote').textContent = `“${f.quote}”`;
+  $('#featuredAttribution').textContent = f.attribution;
+  $('#featuredImg').src = f.image;
+  $('#featuredImg').alt = f.imageAlt;
+  $('#featuredPlate').textContent = f.plate;
 }
 
 function renderBikesShowcase() {
@@ -415,7 +335,11 @@ function renderSchema() {
   $('#ldSchema').textContent = JSON.stringify(list, null, 2);
 }
 
-// Split-text utility — wraps every word for the .split reveal
+// Split-text utility — wraps every word for the .split reveal.
+// `transform: translateY(110%)` on the inner span only clips visually
+// (CSS transforms don't hide content from screen readers), so the text
+// remains live and accessible without needing aria-hidden or sr-only
+// duplication.
 function splitWords(str) {
   return str.split(/(\s+)/).map(token => {
     if (/^\s+$/.test(token)) return token;
@@ -443,7 +367,7 @@ renderTrust();
 renderPackages();
 renderProcess();
 renderWhyGracie();
-renderBeforeAfter();
+renderFeaturedWork();
 renderGallery();
 renderBikesShowcase();
 renderVansRvsShowcase();
