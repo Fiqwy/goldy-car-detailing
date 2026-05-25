@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="bgA" cx="50%" cy="55%" r="85%">
+      <stop offset="0%" stop-color="#1a1d28"/>
+      <stop offset="55%" stop-color="#0a0c14"/>
+      <stop offset="100%" stop-color="#05060a"/>
+    </radialGradient>
+    <linearGradient id="goldGlow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#efcb8a" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#b8893d" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="bodyReflect" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a3a44"/>
+      <stop offset="40%" stop-color="#15151c"/>
+      <stop offset="100%" stop-color="#05060a"/>
+    </linearGradient>
+    <linearGradient id="bodyHighlight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7a7a88" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#7a7a88" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="floorA" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#0a0c14"/>
+      <stop offset="100%" stop-color="#05060a" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bgA)"/>
+  <rect width="1920" height="1080" fill="url(#goldGlow)" opacity="0.6"/>
+  <!-- Reflection on floor -->
+  <ellipse cx="960" cy="720" rx="950" ry="80" fill="url(#bodyReflect)" opacity="0.6"/>
+  <!-- Polished car silhouette -->
+  <path d="M 460 600 L 530 470 Q 600 425 760 415 L 1160 415 Q 1320 425 1390 470 L 1460 600 L 1460 690 L 460 690 Z"
+        fill="url(#bodyReflect)" stroke="#444a55" stroke-width="1.5"/>
+  <!-- Highlight ridge along the top -->
+  <path d="M 530 470 Q 600 425 760 415 L 1160 415 Q 1320 425 1390 470"
+        fill="none" stroke="url(#bodyHighlight)" stroke-width="6" opacity="0.5"/>
+  <!-- Window arc -->
+  <path d="M 620 470 Q 700 425 850 420 L 1070 420 Q 1220 425 1300 470 Z"
+        fill="#1a1d28" stroke="#444a55" stroke-width="1.5"/>
+  <!-- Wheels with gold rim glint -->
+  <circle cx="640" cy="700" r="48" fill="#0a0c14" stroke="#222"/>
+  <circle cx="640" cy="700" r="34" fill="#15151c" stroke="#444a55"/>
+  <circle cx="640" cy="700" r="14" fill="#e0b872" opacity="0.4"/>
+  <circle cx="1280" cy="700" r="48" fill="#0a0c14" stroke="#222"/>
+  <circle cx="1280" cy="700" r="34" fill="#15151c" stroke="#444a55"/>
+  <circle cx="1280" cy="700" r="14" fill="#e0b872" opacity="0.4"/>
+  <!-- Light bloom top-right -->
+  <ellipse cx="1500" cy="280" rx="350" ry="200" fill="#efcb8a" opacity="0.18"/>
+  <rect width="1920" height="200" y="880" fill="url(#floorA)"/>
+  <text x="60" y="1040" font-family="system-ui" font-size="22" fill="#e0b872" letter-spacing="4" opacity="0.6">AFTER · CERAMIC · SHOWROOM</text>
+</svg>

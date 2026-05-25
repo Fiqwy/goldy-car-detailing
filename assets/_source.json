@@ -1,0 +1,32 @@
+{
+  "_doc": "Provenance for every visual asset. Update when swapping in real photos from Gracie's IG or Higgsfield gens. All entries marked _placeholder until Nicholas swaps in real files.",
+  "_updated": "2026-05-25",
+
+  "hero": {
+    "before.webp":  { "source": "placeholder", "_placeholder": true, "_generated": false },
+    "after.webp":   { "source": "placeholder", "_placeholder": true, "_generated": false },
+    "plate-matte.webp":  { "source": "higgsfield-pending", "_placeholder": true, "_generated": true, "_brief": "Black sedan, matte/oxidised finish, low golden-hour light" },
+    "plate-satin.webp":  { "source": "higgsfield-pending", "_placeholder": true, "_generated": true, "_brief": "Same sedan, partially polished, satin reflection" },
+    "plate-mirror.webp": { "source": "higgsfield-pending", "_placeholder": true, "_generated": true, "_brief": "Same sedan, full ceramic mirror reflection, garage-light highlights" }
+  },
+
+  "gallery": {
+    "_note": "Slots 01-15. Pull from @goldycardetailing IG (logged-in download). Each entry should record post URL + capture date once real."
+  },
+
+  "process": {
+    "_note": "Slots 01-05. Best from her own work-in-progress shots. Higgsfield fallback for any she doesn't have (e.g. paint gauge close-up if she doesn't shoot tool shots)."
+  },
+
+  "founder": {
+    "gracie.webp": { "source": "placeholder", "_placeholder": true, "_brief": "Portrait — Gracie at work, golden hour lighting if possible. Real photo only — never AI-generate a person." }
+  },
+
+  "logo": {
+    "_note": "If Gracie has a logo, drop SVG here. Otherwise we ship with type-only wordmark and add logo later."
+  },
+
+  "og": {
+    "og-image.jpg": { "source": "placeholder", "_placeholder": true, "_brief": "1200x630, gold-on-black, wordmark + tagline. Final asset generated after hero is locked." }
+  }
+}

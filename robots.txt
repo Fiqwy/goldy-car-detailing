@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://fiqwy.github.io/goldy-car-detailing/sitemap.xml

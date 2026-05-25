@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="65%" r="80%">
+      <stop offset="0%" stop-color="#1c1a18"/>
+      <stop offset="60%" stop-color="#0e0c0a"/>
+      <stop offset="100%" stop-color="#050404"/>
+    </radialGradient>
+    <linearGradient id="floor" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#1a1815"/>
+      <stop offset="100%" stop-color="#050404" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix values="0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0.18 0"/>
+    </filter>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <ellipse cx="960" cy="700" rx="900" ry="120" fill="#000" opacity="0.4"/>
+  <!-- Dull car silhouette -->
+  <path d="M 480 600 L 540 480 Q 600 440 760 430 L 1160 430 Q 1320 440 1380 480 L 1440 600 L 1440 680 L 480 680 Z"
+        fill="#1a1814" stroke="#2a2622" stroke-width="2"/>
+  <ellipse cx="640" cy="700" rx="80" ry="22" fill="#000"/>
+  <ellipse cx="1280" cy="700" rx="80" ry="22" fill="#000"/>
+  <!-- Dust/grime overlay -->
+  <rect width="1920" height="1080" filter="url(#grain)" opacity="0.6"/>
+  <rect width="1920" height="200" y="880" fill="url(#floor)"/>
+  <text x="60" y="1040" font-family="system-ui" font-size="22" fill="#444" letter-spacing="4">BEFORE · OXIDISED · SWIRLED</text>
+</svg>
