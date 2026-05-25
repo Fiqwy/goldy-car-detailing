@@ -154,6 +154,48 @@ function renderAbout() {
   $('#aboutSig').textContent = content.founder.signature;
 }
 
+function renderBikesShowcase() {
+  const s = content.bikesShowcase;
+  if (!s) return;
+  $('#bikesEyebrow').innerHTML = `<span class="dot"></span> ${s.eyebrow}`;
+  $('#bikesTitle').textContent = s.title;
+  $('#bikesBody').textContent = s.body;
+  $('#bikesCta').innerHTML = `<a href="${s.cta.href}" class="btn btn-primary">${s.cta.label} <span class="arrow">→</span></a>`;
+  $('#bikesPhotos').innerHTML = s.photos.map(p => `
+    <figure class="showcase-photo${p.featured ? ' is-featured' : ''}${p.span === 2 ? ' span-2' : ''}" data-reveal>
+      <img src="${p.src}" alt="${p.alt}" loading="lazy" onerror="this.parentElement.style.background='var(--bg-elev)';this.remove()">
+    </figure>
+  `).join('');
+}
+
+function renderVansRvsShowcase() {
+  const s = content.vansRvsShowcase;
+  if (!s) return;
+  $('#vansRvsEyebrow').innerHTML = `<span class="dot"></span> ${s.eyebrow}`;
+  $('#vansRvsTitle').textContent = s.title;
+  $('#vansRvsBody').textContent = s.body;
+  $('#vansRvsCta').innerHTML = `<a href="${s.cta.href}" class="btn btn-primary">${s.cta.label} <span class="arrow">→</span></a>`;
+  $('#vansRvsPhotos').innerHTML = s.photos.map(p => `
+    <figure class="showcase-photo${p.featured ? ' is-featured' : ''}${p.span === 2 ? ' span-2' : ''}" data-reveal>
+      <img src="${p.src}" alt="${p.alt}" loading="lazy" onerror="this.parentElement.style.background='var(--bg-elev)';this.remove()">
+    </figure>
+  `).join('');
+}
+
+function renderBehindDetail() {
+  const s = content.behindDetail;
+  if (!s) return;
+  $('#behindEyebrow').innerHTML = `<span class="dot"></span> ${s.eyebrow}`;
+  $('#behindTitle').textContent = s.title;
+  $('#behindBody').textContent = s.body;
+  $('#behindStrip').innerHTML = s.photos.map(p => `
+    <figure class="behind-tile" data-reveal>
+      <img src="${p.src}" alt="${p.alt}" loading="lazy" onerror="this.parentElement.style.background='var(--bg-elev)';this.remove()">
+      <figcaption>${p.alt}</figcaption>
+    </figure>
+  `).join('');
+}
+
 function renderSuburbs() {
   $('#suburbGrid').innerHTML = content.suburbs.map(s => `
     <a href="${s.built ? `suburbs/${s.slug}.html` : '#contact'}" class="suburb-card" data-reveal>
@@ -284,6 +326,9 @@ renderTrust();
 renderPackages();
 renderProcess();
 renderGallery();
+renderBikesShowcase();
+renderVansRvsShowcase();
+renderBehindDetail();
 renderTestimonials();
 renderAbout();
 renderSuburbs();

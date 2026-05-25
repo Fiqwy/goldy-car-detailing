@@ -211,9 +211,52 @@ export const content = Object.freeze({
     { id: "daily",   label: "Daily drivers" },
     { id: "special", label: "Special builds" },
     { id: "resale",  label: "Sale-ready" },
-    { id: "bikes",   label: "Bikes" },           // ✓ 3 real photos placed
-    { id: "vans",    label: "Vans & trades" }    // ✓ 4 real photos placed. Caravans/motorhomes in her IG "Motorhomes" story highlight (login required) — Phase 2 swap.
+    { id: "bikes",   label: "Bikes" },
+    { id: "vans",    label: "Vans & trades" }
   ],
+
+  // ============ DEDICATED BIKES SECTION ============
+  bikesShowcase: {
+    eyebrow: "Bikes, too",
+    title: "Two wheels get the same treatment.",
+    body: "Harleys, sportbikes, cruisers, classics. Gracie details bikes with the same care as her best cars — every chrome surface, every leather seam, every painted panel. Smaller booking window, premium finish.",
+    cta: { label: "Build my bike price", href: "#configurator" },
+    photos: [
+      { src: "assets/bikes/03-harley-road-glide-front.jpg", alt: "Black Harley-Davidson Road Glide — front-on, glassy finish",       featured: true,  span: 2 },
+      { src: "assets/bikes/02-harley-rear.jpg",             alt: "Harley-Davidson — finished, depth + clarity + protection restored" },
+      { src: "assets/bikes/01-suzuki-vz1500.jpg",           alt: "Suzuki VZ1500 — mid-wash, coming up unreal" }
+    ]
+  },
+
+  // ============ DEDICATED VANS / CARAVANS / RVs SECTION ============
+  vansRvsShowcase: {
+    eyebrow: "Vans, caravans & horsefloats",
+    title: "Big jobs. Same standard.",
+    body: "Mobile detailing means Gracie's set up to handle the awkward stuff — Hiace vans, work utes, motorhomes, caravans, horsefloats, dog-grooming rigs. She comes to your yard, paddock or property. Bigger vehicles take longer; the standard never changes.",
+    cta: { label: "Get a price for my rig", href: "#configurator" },
+    photos: [
+      { src: "assets/vans-rvs/06-ram-horsefloat.jpg",         alt: "Ram pulled up to a white horsefloat — country setting",     featured: true, span: 2 },
+      { src: "assets/vans-rvs/01-hiace-silver.jpg",           alt: "Toyota Hiace — Silver Package refresher" },
+      { src: "assets/vans-rvs/03-hiace-interior-cleaned.jpg", alt: "Empty Hiace interior — deep-cleaned, road-ready" },
+      { src: "assets/vans-rvs/06-ram-horsefloat.jpg",         alt: "Ram + horsefloat — wider view" },
+      { src: "assets/vans-rvs/05-green-jeep-7hr.jpg",         alt: "Green Jeep Wrangler — 7-hour full clean" },
+      { src: "assets/vans-rvs/04-dog-grooming-van.jpg",       alt: "Dog-grooming work van — de-dog-haired + deep interior" },
+      { src: "assets/vans-rvs/02-hiace-wheel-macro.jpg",      alt: "Hiace wheel macro — bronze rim spec shot" }
+    ]
+  },
+
+  // ============ BEHIND-THE-DETAIL spec/brand strip ============
+  behindDetail: {
+    eyebrow: "Behind the detail",
+    title: "It's the small things.",
+    body: "Branded plates. Business cards on the handover. Steering-wheel wraps before every job. Wheels detailed to the caliper. Owner-operator means every car gets the same care.",
+    photos: [
+      { src: "assets/detail-shots/03-branded-number-plate.jpg",       alt: "GMC Denali grille close-up — Goldy Detailing branded number plate" },
+      { src: "assets/detail-shots/02-business-cards-handover.jpg",    alt: "SsangYong handover — protective steering-wheel wrap + Goldy business cards" },
+      { src: "assets/detail-shots/01-sq7-wheel-calipers.jpg",         alt: "Matte SQ7 wheel + red brake calipers — premium spec" },
+      { src: "assets/detail-shots/04-bmw-interior.jpg",               alt: "BMW X3 interior — finished, dog air-freshener intact" }
+    ]
+  },
 
   // SHIP HONEST — one placeholder marked as such until Gracie shares real screenshots.
   // Suggested Phase-2 sources: IG comment screenshots, Google Reviews, DMs (with permission).
