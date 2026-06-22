@@ -35,7 +35,9 @@ export const content = Object.freeze({
     ],
     sub: "Owner-operated mobile detailing across the Gold Coast — cars, 4WDs, bikes, vans, horsefloats. Real prices upfront, real photos on this page, no quote-back nonsense. Direct with Gracie.",
     primaryCta: { label: "Build my price · 60s", href: "#configurator" },
+    maintenanceCta: { label: "Maintenance plans", href: "#maintenance" },
     secondaryCta: { label: "Text Gracie · 0427 798 045", href: "sms:+61427798045" },
+    video: "assets/hero/hero.mp4",          // H.264, no audio, poster = after.jpg; reduced-motion bails to poster
     beforeAfter: {
       before: "assets/hero/before.jpg",       // ig-17 HSV Clubsport (dimmed via CSS filter)
       after:  "assets/hero/after.jpg",        // ig-17 HSV Clubsport (vivid via CSS filter)
@@ -70,7 +72,7 @@ export const content = Object.freeze({
       {
         glyph: "price",
         title: "No quote-back",
-        body: "Two taps in the price builder above gives you a real number. Other detailers hide pricing behind a form — Gracie shows it. From $189, scales with vehicle size only."
+        body: "Two taps in the price builder above gives you a real number. Other detailers hide pricing behind a form. Gracie shows it. From $150, scales with vehicle size only."
       },
       {
         glyph: "mobile",
@@ -98,9 +100,9 @@ export const content = Object.freeze({
   packages: [
     {
       id: "silver",
-      tier: "Silver Package",
-      priceFrom: 189,                                      // CONFIRM with Gracie
-      turnaround: "90 min – 2 hrs",
+      tier: "Tidy up",
+      priceFrom: 150,                                      // ✓ Gracie-confirmed v6 floor
+      turnaround: "3 – 4 hour estimate",
       summary: "The refresher. Keeps a clean car looking sharp between deeper details.",
       includes: [
         "Snow-foam pre-wash + 2-bucket hand wash",
@@ -113,45 +115,74 @@ export const content = Object.freeze({
     },
     {
       id: "gold",
-      tier: "Gold 🥇 Package",
-      priceFrom: 329,                                      // CONFIRM
-      turnaround: "3–4 hours",
-      summary: "Brings a car back to looking like new. Inside and out, every surface.",
+      tier: "Bring it back",
+      priceFrom: 250,                                      // ✓ Gracie-confirmed v6 floor
+      turnaround: "3 – 5 hour estimate",
+      summary: "The next step up from basic. Best value.",
       includes: [
-        "Full exterior decontamination (iron + tar removal)",
-        "Clay treatment for glass-smooth paint",
-        "Single-stage machine polish — light swirls removed",
-        "Full interior shampoo (seats, carpets, mats)",
-        "Plastics cleaned + coated · leather conditioned · windows like new"
+        "Snow-foam pre-wash + 2-bucket hand wash",
+        "Wheels, arches and tyres dressed",
+        "Interior vacuum + plastics wipe-down",
+        "Windows inside and out",
+        "Tyre shine + spray sealant top-up",
+        "Full exterior decontamination",
+        "Full interior shampoo",
+        "Plastics cleaned + coated",
+        "Leather conditioned",
+        "Windows like new"
       ],
       popular: true,
       finishPlate: "assets/hero/plate-satin.svg"
     },
     {
       id: "diamond",
-      tier: "Diamond 💎 Package",
-      priceFrom: 549,                                      // CONFIRM
-      turnaround: "Full day",
+      tier: "Show-ready",
+      priceFrom: 550,                                      // ✓ Gracie-confirmed v6 floor
+      turnaround: "Full day estimate",
       summary: "Sale-ready, show-ready, wedding-ready. The full restoration.",
       includes: [
-        "Everything in Gold 🥇 Package",
-        "Two-stage paint correction (deeper swirls + holograms removed)",
-        "9-month ceramic coating on paint, glass + wheels",
+        "Snow-foam pre-wash + 2-bucket hand wash",
+        "Wheels, arches and tyres dressed",
+        "Interior vacuum + plastics wipe-down",
+        "Windows inside and out",
+        "Tyre shine + spray sealant top-up",
+        "Full exterior decontamination",
+        "Full interior shampoo",
+        "Plastics cleaned + coated",
+        "Leather conditioned",
+        "Windows like new",
+        "Cut & polish",
         "Engine bay detail + door jambs",
-        "Photo handover — before/after for your records"
+        "Sale photography: taken on a Canon 1500D, draws more attention to your listing"
       ],
       finishPlate: "assets/hero/plate-mirror.svg"
+    },
+    {
+      id: "custom",
+      tier: "Custom",
+      priceFrom: 150,
+      turnaround: "",
+      summary: "Questioning the packages? Start with the Tidy up base and add exactly what your car needs.",
+      includes: [
+        "Starts with the Tidy up base",
+        "Add any extra service you want",
+        "Watch it add up against a package"
+      ],
+      custom: true,
+      finishPlate: "assets/hero/plate-matte.svg"
     }
   ],
 
-  // Bonus offer — Gracie's actual maintenance plan (referenced 5x in captions)
+  // Recurring maintenance plan for her regulars (v6: dedicated section + hero CTA)
   maintenancePlan: {
     enabled: true,
-    title: "Maintenance Plan",
-    badge: "Limited spots",
-    blurb: "Fortnightly or 5-week recurring detail — set and forget. Returning clients only.",
-    priceFrom: 129,                                        // CONFIRM
-    cadenceOptions: ["Fortnightly", "Monthly", "5-weekly"]
+    eyebrow: "For my regulars",
+    title: "Set and forget. Discounted by default.",
+    blurb: "Gracie keeps the list small so every car gets the same care, all at a discounted rate. Regulars book their next clean in a tap. New clients can enquire to join the list.",
+    microcopy: "Limited spots · Returning clients get the discounted rate",
+    cadenceOptions: ["Weekly", "Fortnightly", "Monthly", "3-monthly", "Custom"],
+    bookCta:    { label: "Book my next clean" },   // regulars
+    enquireCta: { label: "Enquire to join" }        // new clients
   },
 
   sizeMultipliers: {
@@ -164,18 +195,36 @@ export const content = Object.freeze({
   },
 
   goals: [
-    { id: "shine",    label: "Maintenance shine",     blurb: "Keep it sharp between deep cleans.",         packageId: "silver" },
-    { id: "restore",  label: "Bring it back",          blurb: "Years of grime, swirls, neglect — reset it.", packageId: "gold" },
-    { id: "sale",     label: "Sale-ready",             blurb: "Hand it to the buyer at its best.",          packageId: "diamond" },
-    { id: "special",  label: "Special occasion",       blurb: "Wedding, show, milestone, gift.",            packageId: "diamond" }
+    { id: "tidy",    label: "Tidy up",       blurb: "A light wash to keep it sharp between deep cleans.",  packageId: "silver" },
+    { id: "restore", label: "Bring it back", blurb: "Years of grime, swirls, neglect. Reset it.",          packageId: "gold" },
+    { id: "show",    label: "Show-ready",    blurb: "Sale, wedding, show or milestone. Its absolute best.", packageId: "diamond" }
   ],
 
   addOns: [
     { id: "petHair",     name: "Pet hair removal",            price: 45,  note: "Per vehicle" },
     { id: "leather",     name: "Deep leather conditioning",   price: 65,  note: "Adds ~30 min" },
     { id: "headlights",  name: "Headlight restoration",       price: 95,  note: "Pair, restores clarity" },
-    { id: "engineBay",   name: "Engine bay detail",           price: 75,  note: "Plastics dressed, no risk" },
-    { id: "ceramic9",    name: "Upgrade to 24-month ceramic", price: 220, note: "Diamond tier only" }
+    { id: "engineBay",   name: "Engine bay detail",           price: 75,  note: "Plastics dressed, no risk" }
+  ],
+
+  // Per-service menu for the Custom builder. Prices marked CONFIRM are
+  // ESTIMATES; swap in Gracie's real per-service prices. Set so building it all
+  // individually beats a package (proves the bundles are the better value).
+  customServices: [
+    { id: "wash",       group: "Exterior", name: "Snow-foam pre-wash + 2-bucket hand wash", price: 55, base: true },  // in Tidy up base
+    { id: "wheels",     group: "Exterior", name: "Wheels, arches & tyres dressed",          price: 35, base: true },  // in Tidy up base
+    { id: "tyreseal",   group: "Exterior", name: "Tyre shine + spray sealant top-up",       price: 25, base: true },  // in Tidy up base
+    { id: "decon",      group: "Exterior", name: "Full exterior decontamination",           price: 85 },  // CONFIRM
+    { id: "cutpolish",  group: "Exterior", name: "Cut & polish",                            price: 190 }, // CONFIRM
+    { id: "headlights", group: "Exterior", name: "Headlight restoration",                   price: 95 },  // ✓ real add-on
+    { id: "vacuum",     group: "Interior", name: "Interior vacuum + plastics wipe-down",    price: 45, base: true },  // in Tidy up base
+    { id: "windows",    group: "Interior", name: "Windows inside and out",                  price: 25, base: true },  // in Tidy up base
+    { id: "shampoo",    group: "Interior", name: "Full interior shampoo",                   price: 120 }, // CONFIRM
+    { id: "plastics",   group: "Interior", name: "Plastics cleaned + coated",               price: 45 },  // CONFIRM
+    { id: "leather",    group: "Interior", name: "Leather conditioned",                     price: 65 },  // ✓ real add-on
+    { id: "pethair",    group: "Interior", name: "Pet hair removal",                        price: 45 },  // ✓ real add-on
+    { id: "enginebay",  group: "Extras",   name: "Engine bay detail + door jambs",          price: 75 },  // ✓ real add-on
+    { id: "photos",     group: "Extras",   name: "Sale photography (Canon 1500D)",          price: 45 }   // CONFIRM
   ],
 
   // 5-step process — the journey, with real photos
@@ -201,13 +250,13 @@ export const content = Object.freeze({
     {
       step: "04",
       title: "Protection",
-      body: "Ceramic coating bonded to paint, glass and wheels. Water beads off, dirt struggles to grip, the shine sticks around for months — not days.",
+      body: "A spray sealant laid over paint, glass and wheels. Water beads off, dirt struggles to grip, and the shine holds for weeks instead of days.",
       image: "assets/process/04-protection.jpg"
     },
     {
       step: "05",
       title: "Final inspection + handover",
-      body: "Inspected under bright light from every angle. Diamond tier includes a photo handover for your records. Then I'm out of your driveway.",
+      body: "Inspected under bright light from every angle. Show-ready includes sale photography for your listing. Then I'm out of your driveway.",
       image: "assets/process/05-handover.jpg"
     }
   ],
@@ -215,7 +264,7 @@ export const content = Object.freeze({
   // 22 photos, all real, all from her IG portfolio (1440×1920 high-res)
   gallery: [
     // ---- DAILY DRIVERS (5) ----
-    { src: "assets/gallery/01-bmw-x3.jpg",                alt: "BMW X3 — Gold 🥇 Package finish",                            category: "daily"  },
+    { src: "assets/gallery/01-bmw-x3.jpg",                alt: "BMW X3 — full detail, showroom finish",                            category: "daily"  },
     { src: "assets/gallery/02-audi-sq7.jpg",              alt: "2019 Audi SQ7 — basic wash & interior",                     category: "daily"  },
     { src: "assets/gallery/03-discovery.jpg",             alt: "Land Rover Discovery — full detail, showroom glow",         category: "daily"  },
     { src: "assets/gallery/04-audi.jpg",                  alt: "Audi — shine restored",                                     category: "daily"  },
@@ -232,7 +281,7 @@ export const content = Object.freeze({
     { src: "assets/gallery/25-white-4wd.jpg",             alt: "White off-road 4WD — finished and ready for the next trip", category: "special" },
 
     // ---- SALE-READY (4) ----
-    { src: "assets/gallery/12-santa-fe-sale.jpg",         alt: "Hyundai Santa Fe — Diamond 💎 Package, sale-ready",          category: "resale"  },
+    { src: "assets/gallery/12-santa-fe-sale.jpg",         alt: "Hyundai Santa Fe — sale-ready detail",          category: "resale"  },
     { src: "assets/gallery/13-musso-sale.jpg",            alt: "SsangYong Musso — sale detail package",                     category: "resale"  },
     { src: "assets/gallery/14-commodore-250.jpg",         alt: "Holden Commodore — $250 full interior reset",               category: "resale"  },
     { src: "assets/gallery/15-gooseneck-sale.jpg",        alt: "Gooseneck towing rig — full makeover for sale",             category: "resale"  },
@@ -244,7 +293,7 @@ export const content = Object.freeze({
     { src: "assets/gallery/18-suzuki-vz1500.jpg",         alt: "Suzuki VZ1500 — mid-wash, motorcycle detail",               category: "bikes"   },
 
     // ---- VANS & TRADES (4) — RVs in her IG highlights (login-walled, see HANDOFF) ----
-    { src: "assets/gallery/19-hiace-van.jpg",             alt: "Toyota Hiace Van — Silver Package refresher",               category: "vans"    },
+    { src: "assets/gallery/19-hiace-van.jpg",             alt: "Toyota Hiace Van — detail refresher",               category: "vans"    },
     { src: "assets/gallery/20-hiace-wheel-detail.jpg",    alt: "Hiace wheel + bodywork detail — bronze rim, white panel",   category: "vans"    },
     { src: "assets/gallery/21-dog-van.jpg",               alt: "Dog-grooming work van — de-dog-hairing + deep interior",    category: "vans"    },
     { src: "assets/gallery/22-work-ute.jpg",              alt: "Work ute — even work utes deserve some love",               category: "vans"    }
@@ -279,7 +328,7 @@ export const content = Object.freeze({
     cta: { label: "Get a price for my rig", href: "#configurator" },
     photos: [
       { src: "assets/vans-rvs/06-ram-horsefloat.jpg",         alt: "Ram pulled up to a white horsefloat — country setting", featured: true, span: 2 },
-      { src: "assets/vans-rvs/01-hiace-silver.jpg",           alt: "Toyota Hiace — Silver Package refresher" },
+      { src: "assets/vans-rvs/01-hiace-silver.jpg",           alt: "Toyota Hiace — detail refresher" },
       { src: "assets/vans-rvs/03-hiace-interior-cleaned.jpg", alt: "Empty Hiace interior — deep-cleaned, road-ready" },
       { src: "assets/vans-rvs/04-dog-grooming-van.jpg",       alt: "Dog-grooming work van — de-dog-haired + deep interior" },
       { src: "assets/vans-rvs/02-hiace-wheel-macro.jpg",      alt: "Hiace wheel macro — bronze rim spec shot" }
@@ -338,19 +387,19 @@ export const content = Object.freeze({
     },
     {
       q: "How long does it take?",
-      a: "Silver Package is about 90 minutes to 2 hours. Gold 🥇 is 3–4 hours. Diamond 💎 is a full day — we'll lock in a Saturday so it doesn't interrupt your week."
+      a: "Tidy up is about 3 to 4 hours, Bring it back is 3 to 5 hours, Show-ready is a full day. Times are estimates so Gracie doesn't double-book her day. For Show-ready we'll lock in a Saturday so it doesn't interrupt your week."
     },
     {
       q: "What does it cost?",
-      a: "Prices start from $189 and scale with vehicle size only — no surprise quote-back. The price builder gives you an instant estimate. For reference: a recent Holden Commodore full interior reset was $250."
+      a: "Prices start from $150 and scale with vehicle size only, no surprise quote-back. The price builder gives you an instant estimate. For reference: a recent Holden Commodore full interior reset was $250."
     },
     {
-      q: "Do you do ceramic coatings?",
-      a: "Yes. Gold 🥇 includes a 3-month spray sealant. Diamond 💎 includes a proper 9-month bonded ceramic coating on paint, glass and wheels. 24-month upgrade available as an add-on."
+      q: "Do you do paint protection?",
+      a: "Yes. Every detail finishes with a spray sealant that beads water and protects the paint. Bring it back and Show-ready add a full decontamination and a cut & polish to bring the gloss back and make the protection last. For most Gold Coast cars that's the sweet spot for shine and value."
     },
     {
       q: "What's the maintenance plan?",
-      a: "Returning clients can join a fortnightly, monthly or 5-weekly schedule. Limited spots — Gracie keeps the list small to protect quality. Porsches, Skylines and a 1959 Chevy are all current regulars."
+      a: "Returning clients can join a weekly, fortnightly, monthly or 3-monthly schedule at a discounted rate. Limited spots, so Gracie keeps the list small to protect quality. Porsches, Skylines and a 1959 Chevy are all current regulars. New enquiries can apply to join."
     },
     {
       q: "What if I'm not happy?",
@@ -401,7 +450,7 @@ export const content = Object.freeze({
     "@type": "AutoBodyShop",
     additionalType: "https://schema.org/AutoDetailing",
     name: "Goldy Car Detailing",
-    description: "Mobile car detailing on the Gold Coast — cars, 4WDs, bikes, vans, motorhomes. Silver, Gold and Diamond packages from $189. Female-owned. Direct with Gracie.",
+    description: "Mobile car detailing on the Gold Coast: cars, 4WDs, bikes, vans, motorhomes. Tidy up, Bring it back and Show-ready packages from $150. Female-owned. Direct with Gracie.",
     priceRange: "$$",
     image: "https://fiqwy.github.io/goldy-car-detailing/assets/og/og-image.jpg",
     url: "https://fiqwy.github.io/goldy-car-detailing/",

@@ -34,8 +34,11 @@ function renderHero() {
   $('#heroSub').textContent = h.sub;
 
   $('#heroCtas').innerHTML = `
-    <a href="${h.primaryCta.href}" class="btn btn-primary">${h.primaryCta.label} <span class="arrow">→</span></a>
-    <a href="${h.secondaryCta.href}" class="btn btn-ghost">${h.secondaryCta.label}</a>
+    <div class="hero-cta-row">
+      <a href="${h.primaryCta.href}" class="btn btn-primary">${h.primaryCta.label} <span class="arrow">→</span></a>
+      <a href="${h.secondaryCta.href}" class="btn btn-ghost">${h.secondaryCta.label}</a>
+    </div>
+    <a href="${h.maintenanceCta.href}" class="btn btn-ghost btn-maint">${h.maintenanceCta.label} <span class="arrow">→</span></a>
   `;
 
   $('#heroBeforeLabel').textContent = h.beforeAfter.label;
@@ -51,6 +54,91 @@ function renderTrust() {
       <div class="trust-label">${t.label}</div>
     </div>`;
   }).join('');
+}
+
+function renderMaintenance() {
+  const m = content.maintenancePlan;
+  if (!m || !m.enabled) return;
+  const mount = $('#maintenanceMount');
+  if (!mount) return;
+
+  const DEFAULT = 'Fortnightly';
+  const chips = m.cadenceOptions.map(c =>
+    `<button type="button" class="cadence-chip${c === DEFAULT ? ' is-selected' : ''}" data-cadence="${c}" aria-pressed="${c === DEFAULT}">${c}</button>`
+  ).join('');
+
+  mount.innerHTML = `
+    <div class="maintenance-copy" data-reveal>
+      <p class="eyebrow"><span class="dot"></span> ${m.eyebrow}</p>
+      <h2 class="split maintenance-title">${m.title}</h2>
+      <p class="maintenance-blurb">${m.blurb}</p>
+    </div>
+    <div class="maintenance-pick" data-reveal>
+      <div class="cadence-label">How often?</div>
+      <div class="cadence-chips" id="cadenceChips">${chips}</div>
+      <div class="maintenance-ctas">
+        <a href="#" class="btn btn-primary" id="maintBook">${m.bookCta.label} <span class="arrow">→</span></a>
+        <a href="#" class="btn btn-ghost" id="maintEnquire">${m.enquireCta.label}</a>
+      </div>
+      <p class="maintenance-micro">${m.microcopy}</p>
+    </div>
+  `;
+
+  let cadence = DEFAULT;
+  const bookEl = $('#maintBook');
+  const enquireEl = $('#maintEnquire');
+
+  function mailto(subject, intro) {
+    const body = encodeURIComponent([
+      `Hi Gracie,`, ``,
+      intro, ``,
+      `Preferred cadence: ${cadence}`, ``,
+      `My name: `, `Phone: `, `Suburb: `, `Vehicle: `, ``,
+      `Cheers!`
+    ].join('\n'));
+    return `mailto:${content.booking.mailtoTarget}?subject=${encodeURIComponent(subject)}&body=${body}`;
+  }
+  function syncCtas() {
+    bookEl.href = mailto('Maintenance plan booking', "I'm a returning client and I'd like to book my next clean.");
+    enquireEl.href = mailto('Maintenance plan enquiry', "I'd like to enquire about joining your maintenance plan.");
+  }
+  syncCtas();
+
+  $('#cadenceChips').addEventListener('click', e => {
+    const btn = e.target.closest('[data-cadence]');
+    if (!btn) return;
+    cadence = btn.dataset.cadence;
+    $$('.cadence-chip', mount).forEach(c => {
+      const on = c === btn;
+      c.classList.toggle('is-selected', on);
+      c.setAttribute('aria-pressed', String(on));
+    });
+    syncCtas();
+  });
+}
+
+function initHeroVideo() {
+  if (REDUCED || !content.hero.video) return;   // reduced motion → static poster (after.jpg)
+  const bg = document.querySelector('.hero-bg');
+  if (!bg) return;
+  // The video IS the hero background — autoplays on landing, covers the stills.
+  const v = document.createElement('video');
+  v.className = 'hero-video is-ready';
+  v.muted = true;
+  v.defaultMuted = true;
+  v.loop = true;
+  v.autoplay = true;
+  v.playsInline = true;
+  v.setAttribute('muted', '');
+  v.setAttribute('playsinline', '');
+  v.setAttribute('autoplay', '');
+  v.setAttribute('loop', '');
+  v.setAttribute('preload', 'auto');
+  v.poster = content.hero.beforeAfter.after;   // after.jpg = first paint, no black flash
+  v.src = content.hero.video;
+  bg.appendChild(v);
+  const p = v.play();
+  if (p && typeof p.catch === 'function') p.catch(() => {});
 }
 
 function renderPackages() {
@@ -74,12 +162,124 @@ function renderPackages() {
         <span class="pkg-price-num">${currencyAU(p.priceFrom)}</span>
         <small>from</small>
       </div>
-      <div class="pkg-turnaround">${p.turnaround}</div>
+      ${p.turnaround ? `<div class="pkg-turnaround">${p.turnaround}</div>` : ''}
       <div class="pkg-divider"></div>
-      <ul class="pkg-includes">${p.includes.map(i => `<li>${i}</li>`).join('')}</ul>
-      <div class="pkg-cta"><a href="#configurator" class="btn btn-ghost">Build this price <span class="arrow">→</span></a></div>
+      <ul class="pkg-includes">${p.includes.slice(0, 5).map(i => `<li>${i}</li>`).join('')}</ul>
+      ${p.includes.length > 5 ? `<details class="pkg-more"><summary>See full list <span class="pkg-more-count">+${p.includes.length - 5}</span></summary><ul class="pkg-includes">${p.includes.slice(5).map(i => `<li>${i}</li>`).join('')}</ul></details>` : ''}
+      <div class="pkg-cta"><a href="${p.custom ? '#build-your-own' : '#configurator'}" class="btn btn-ghost">${p.custom ? 'Build your own price' : 'Get my price'} <span class="arrow">→</span></a></div>
     </article>
   `).join('');
+}
+
+function renderCustomBuilder() {
+  const services = content.customServices;
+  const mount = $('#buildMount');
+  if (!mount || !services) return;
+
+  const basePkg = content.packages.find(p => p.id === 'silver'); // the Tidy up base
+  const BASE_PRICE = basePkg ? basePkg.priceFrom : 150;
+  const BASE_NAME = basePkg ? basePkg.tier : 'Tidy up';
+  const SHOWREADY = 550;
+
+  const baseServices = services.filter(s => s.base);
+  const extras = services.filter(s => !s.base);
+  const extraGroups = [];
+  extras.forEach(s => { if (!extraGroups.includes(s.group)) extraGroups.push(s.group); });
+  const selected = new Set(); // extras only — the base is always included
+
+  const baseList = baseServices.map(s => `<li>${s.name}</li>`).join('');
+  const extrasHtml = extraGroups.map(g => `
+    <div class="build-group">
+      <div class="cfg-svc-group-title">${g}</div>
+      ${extras.filter(s => s.group === g).map(s => `
+        <button type="button" class="cfg-svc" data-svc="${s.id}" aria-pressed="false">
+          <span class="cfg-svc-check" aria-hidden="true"></span>
+          <span class="cfg-svc-name">${s.name}</span>
+          <span class="cfg-svc-price">+${currencyAU(s.price)}</span>
+        </button>`).join('')}
+    </div>`).join('');
+
+  mount.innerHTML = `
+    <div class="section-head">
+      <p class="eyebrow"><span class="dot"></span> Build your own</p>
+      <h2 class="split">Not sure a package fits? Build it yourself.</h2>
+      <p>Start with the ${BASE_NAME} base, then add anything you want. Watch it add up. Packages usually work out cheaper.</p>
+    </div>
+    <div class="build-panel" data-reveal>
+      <div class="build-base">
+        <div class="build-base-head">
+          <span class="build-base-title">${BASE_NAME} base <span class="build-base-tag">Included</span></span>
+          <span class="build-base-price">${currencyAU(BASE_PRICE)}</span>
+        </div>
+        <details class="cfg-includes-accordion build-base-acc">
+          <summary>What's in the base</summary>
+          <ul class="cfg-includes">${baseList}</ul>
+        </details>
+      </div>
+      <div class="build-add-label">Add to it</div>
+      <div class="build-menu">${extrasHtml}</div>
+      <div class="build-summary">
+        <div class="build-total">
+          <span class="build-total-label">Your build</span>
+          <span class="build-total-num" id="buildTotal">${currencyAU(BASE_PRICE)}</span>
+        </div>
+        <p class="cfg-compare" id="buildCompare"></p>
+        <div class="hero-ctas build-ctas">
+          <a href="#" class="btn btn-primary" id="buildBook">Book this build <span class="arrow">→</span></a>
+          <a href="tel:+61427798045" class="btn btn-ghost">Call or text · 0427 798 045</a>
+        </div>
+        <p class="cfg-foot">Prices are per service. Gracie confirms the final total for your vehicle.</p>
+      </div>
+    </div>
+  `;
+
+  const totalEl = $('#buildTotal');
+  const cmpEl = $('#buildCompare');
+  const bookEl = $('#buildBook');
+
+  function total() {
+    let t = BASE_PRICE;
+    selected.forEach(id => { const s = extras.find(x => x.id === id); if (s) t += s.price; });
+    return t;
+  }
+  function buildMailto() {
+    const picked = [...selected].map(id => {
+      const s = extras.find(x => x.id === id);
+      return s ? `- ${s.name} (+${currencyAU(s.price)})` : null;
+    }).filter(Boolean);
+    const lines = [
+      `Hi Gracie,`, ``,
+      `I built a custom detail on the site:`, ``,
+      `Base: ${BASE_NAME} (${currencyAU(BASE_PRICE)})`,
+      `Added:`,
+      ...(picked.length ? picked : ['- (nothing extra yet)']),
+      ``,
+      `Total: ${currencyAU(total())}`, ``,
+      `My name: `, `Phone: `, `Suburb: `, `Vehicle: `, ``,
+      `Cheers!`
+    ];
+    return `mailto:${content.booking.mailtoTarget}?subject=${encodeURIComponent('Custom build enquiry')}&body=${encodeURIComponent(lines.join('\n'))}`;
+  }
+  function sync() {
+    const t = total();
+    totalEl.textContent = currencyAU(t);
+    bookEl.href = buildMailto();
+    let msg;
+    if (t <= BASE_PRICE) msg = `That's the ${BASE_NAME} package. Add anything below and watch it climb.`;
+    else if (t <= SHOWREADY) msg = `Building it up service by service. Show-ready does the lot for ${currencyAU(SHOWREADY)}, so a package usually works out cheaper.`;
+    else msg = `That's ${currencyAU(t - SHOWREADY)} more than the Show-ready package (${currencyAU(SHOWREADY)}), which includes the lot. The package is the better deal.`;
+    cmpEl.textContent = msg;
+  }
+  sync();
+
+  mount.querySelector('.build-menu').addEventListener('click', e => {
+    const btn = e.target.closest('[data-svc]');
+    if (!btn) return;
+    const id = btn.dataset.svc;
+    if (selected.has(id)) { selected.delete(id); btn.classList.remove('is-selected'); btn.setAttribute('aria-pressed', 'false'); }
+    else { selected.add(id); btn.classList.add('is-selected'); btn.setAttribute('aria-pressed', 'true'); }
+    sync();
+  });
 }
 
 function renderProcess() {
@@ -364,7 +564,9 @@ function applySplits() {
 // ============================================================
 renderHero();
 renderTrust();
+renderMaintenance();
 renderPackages();
+renderCustomBuilder();
 renderProcess();
 renderWhyGracie();
 renderFeaturedWork();
@@ -790,6 +992,7 @@ $('#contactForm').addEventListener('submit', e => {
 // ============================================================
 initConfigurator(content);
 initHeroShader();
+initHeroVideo();
 
 // Run overture last, then refresh ScrollTrigger so any layout-shifted
 // triggers fire correctly

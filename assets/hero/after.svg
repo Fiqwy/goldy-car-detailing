@@ -46,5 +46,5 @@
   <!-- Light bloom top-right -->
   <ellipse cx="1500" cy="280" rx="350" ry="200" fill="#efcb8a" opacity="0.18"/>
   <rect width="1920" height="200" y="880" fill="url(#floorA)"/>
-  <text x="60" y="1040" font-family="system-ui" font-size="22" fill="#e0b872" letter-spacing="4" opacity="0.6">AFTER · CERAMIC · SHOWROOM</text>
+  <text x="60" y="1040" font-family="system-ui" font-size="22" fill="#e0b872" letter-spacing="4" opacity="0.6">AFTER · SHOWROOM FINISH</text>
 </svg>

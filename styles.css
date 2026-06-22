@@ -688,7 +688,7 @@ section { padding-block: var(--gap-section); position: relative; }
 .pkg-plate.is-active { opacity: 0.45; }
 .pkg-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.4rem;
   position: relative;
   z-index: 1;
@@ -1306,7 +1306,7 @@ body.has-cursor .cursor-glow { opacity: 1; }
 @media (max-width: 1024px) {
   .nav-links { display: none; }
   .burger { display: block; }
-  .pkg-grid { grid-template-columns: 1fr; }
+  .pkg-grid { grid-template-columns: repeat(2, 1fr); }
   .gallery-grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 200px; }
   .gallery-tile.wide { grid-column: span 2; }
   .gallery-tile.tall { grid-row: span 1; }
@@ -1329,6 +1329,7 @@ body.has-cursor .cursor-glow { opacity: 1; }
   body { font-size: 16px; }
   .hero { padding-top: 7rem; padding-bottom: 4rem; }
   .hero-meta { display: none; }
+  .pkg-grid { grid-template-columns: 1fr; }
   .scroll-cue { display: none; }
   .nav-phone { display: none; }
   .trust-row { grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
@@ -1898,4 +1899,409 @@ body.has-cursor .cursor-glow { opacity: 1; }
   background-clip: text;
   color: transparent;
   font-style: italic;
+}
+
+/* =====================================================================
+   v6 — CONFIGURATOR RESULT: summary, includes accordion, add-on picker
+   ===================================================================== */
+.cfg-result-summary {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+}
+
+/* Keep the "from · estimate" line readable — override the gradient's
+   transparent text-fill it would otherwise inherit from .cfg-price. */
+.cfg-price small {
+  display: block;
+  margin-top: 0.25rem;
+  background: none;
+  -webkit-text-fill-color: var(--text-muted);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.42em;
+  letter-spacing: 0.03em;
+  text-transform: none;
+}
+
+.cfg-includes-accordion {
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: rgba(255, 255, 255, 0.02);
+  overflow: hidden;
+}
+.cfg-includes-accordion > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.95rem 1.1rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.98rem;
+  color: var(--text-primary);
+  transition: background 200ms var(--ease-out);
+}
+.cfg-includes-accordion > summary::-webkit-details-marker { display: none; }
+.cfg-includes-accordion > summary::after {
+  content: '';
+  width: 9px; height: 9px;
+  border-right: 2px solid var(--gold);
+  border-bottom: 2px solid var(--gold);
+  transform: rotate(45deg);
+  transition: transform 240ms var(--ease-out);
+  margin-right: 0.2rem;
+  flex: none;
+}
+.cfg-includes-accordion[open] > summary::after { transform: rotate(-135deg); }
+.cfg-includes-accordion > summary:hover { background: var(--gold-soft); }
+.cfg-includes-accordion .cfg-includes { padding: 0.2rem 1.1rem 1.1rem; }
+
+/* Custom goal — add-on picker */
+.cfg-addons { margin-top: 0.1rem; }
+.cfg-addons-label {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 0.7rem;
+}
+.cfg-addons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.7rem;
+}
+.cfg-addon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  text-align: left;
+  cursor: pointer;
+  transition: border 200ms var(--ease-out), background 200ms var(--ease-out), transform 200ms var(--ease-out);
+}
+.cfg-addon:hover { border-color: var(--gold-line); transform: translateY(-2px); }
+.cfg-addon.is-selected {
+  border-color: var(--gold);
+  background: var(--gold-soft);
+  box-shadow: 0 0 0 1px var(--gold);
+}
+.cfg-addon-name { font-weight: 600; font-size: 0.92rem; color: var(--text-primary); }
+.cfg-addon-price {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--gold);
+  font-size: 0.92rem;
+  white-space: nowrap;
+}
+
+.cfg-ctas { margin-top: 0.1rem; }
+.cfg-hedge {
+  margin-top: 0.7rem;
+  font-size: 0.85rem;
+  color: var(--text-body);
+  text-align: center;
+}
+.cfg-foot {
+  margin-top: 0.15rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Custom build-your-own picker */
+.cfg-builder { display: grid; gap: 1.1rem; }
+.cfg-svc-group-title {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  margin-bottom: 0.55rem;
+}
+.cfg-svc {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 0.5rem;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: border 180ms var(--ease-out), background 180ms var(--ease-out);
+}
+.cfg-svc:last-child { margin-bottom: 0; }
+.cfg-svc:hover { border-color: var(--gold-line); }
+.cfg-svc.is-selected { border-color: var(--gold); background: var(--gold-soft); }
+.cfg-svc-check {
+  width: 18px; height: 18px; flex: none;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 5px;
+  position: relative;
+  transition: background 180ms var(--ease-out), border-color 180ms var(--ease-out);
+}
+.cfg-svc.is-selected .cfg-svc-check { background: var(--gold); border-color: var(--gold); }
+.cfg-svc.is-selected .cfg-svc-check::after {
+  content: '';
+  position: absolute; left: 5px; top: 1px;
+  width: 5px; height: 9px;
+  border: solid #1A1208; border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.cfg-svc-name { flex: 1; font-size: 0.92rem; color: var(--text-body); }
+.cfg-svc.is-selected .cfg-svc-name { color: var(--text-primary); }
+.cfg-svc-price {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--gold);
+  font-size: 0.92rem;
+  white-space: nowrap;
+}
+.cfg-compare {
+  padding: 0.85rem 1.1rem;
+  background: rgba(224, 184, 114, 0.06);
+  border: 1px solid var(--gold-line);
+  border-radius: var(--r);
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+.pkg-price-custom { font-size: 1.5rem; }
+
+/* ===================== BUILD-YOUR-OWN SECTION ===================== */
+.build { position: relative; padding: var(--gap-section) 0; }
+.build-panel {
+  max-width: 1000px;
+  margin: 2.4rem auto 0;
+  background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-card-2) 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: clamp(1.5rem, 3vw, 2.6rem);
+  box-shadow: var(--shadow-card);
+}
+.build-menu {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.6rem;
+  align-items: start;
+}
+.build-summary {
+  margin-top: 1.6rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--line);
+}
+.build-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+}
+.build-total-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+.build-total-num {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.9rem, 3.4vw, 2.8rem);
+  letter-spacing: -0.02em;
+  background: linear-gradient(95deg, var(--gold-warm), var(--gold), var(--gold-deep));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.build-ctas { margin-top: 1rem; }
+
+/* Pre-included Tidy up base */
+.build-base {
+  padding: 1.1rem 1.2rem;
+  margin-bottom: 1.4rem;
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-line);
+  border-radius: var(--r);
+}
+.build-base-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.build-base-title { font-family: var(--font-display); font-weight: 700; color: var(--text-primary); }
+.build-base-tag {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #1A1208;
+  background: var(--gold);
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-left: 0.4rem;
+}
+.build-base-price { font-family: var(--font-display); font-weight: 800; color: var(--gold); font-size: 1.3rem; }
+.build-base-acc { margin-top: 0.7rem; border: none; background: transparent; border-radius: 0; }
+.build-base-acc > summary { padding: 0.3rem 0; font-size: 0.85rem; }
+.build-base-acc .cfg-includes { padding: 0.2rem 0 0; }
+.build-add-label {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 0.8rem;
+}
+@media (max-width: 760px) { .build-menu { grid-template-columns: 1fr; } }
+
+/* =====================================================================
+   v6 — PACKAGES "See full list" toggle
+   ===================================================================== */
+.pkg-more > summary {
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gold);
+  padding: 0.15rem 0;
+}
+.pkg-more > summary::-webkit-details-marker { display: none; }
+.pkg-more > summary::after {
+  content: '';
+  width: 7px; height: 7px;
+  border-right: 2px solid var(--gold);
+  border-bottom: 2px solid var(--gold);
+  transform: rotate(45deg);
+  transition: transform 220ms var(--ease-out);
+}
+.pkg-more[open] > summary::after { transform: rotate(-135deg); }
+.pkg-more .pkg-includes { margin-top: 0.6rem; }
+.pkg-more-count { color: var(--text-muted); font-weight: 600; }
+
+/* =====================================================================
+   v6 — MAINTENANCE PLAN section (recurring offer for regulars)
+   ===================================================================== */
+.maintenance {
+  position: relative;
+  padding: var(--gap-section) 0;
+  background: linear-gradient(180deg, var(--bg-deep) 0%, #0a0c14 55%, var(--bg-deep) 100%);
+}
+.maintenance-panel {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: clamp(1.6rem, 4vw, 3.4rem);
+  align-items: center;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: clamp(1.6rem, 3.2vw, 3rem);
+  background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-card-2) 100%);
+  border: 1px solid var(--gold-line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+}
+.maintenance-panel::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--gold-soft) 0%, transparent 35%, transparent 65%, var(--gold-soft) 100%);
+  pointer-events: none;
+}
+.maintenance-copy, .maintenance-pick { position: relative; }
+.maintenance-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0.6rem 0 0.9rem;
+}
+.maintenance-blurb {
+  color: var(--text-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 34rem;
+}
+.cadence-label {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 0.7rem;
+}
+.cadence-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.3rem;
+}
+.cadence-chip {
+  padding: 0.6rem 1.05rem;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-strong);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: border 200ms var(--ease-out), background 200ms var(--ease-out), color 200ms var(--ease-out), transform 200ms var(--ease-out);
+}
+.cadence-chip:hover { border-color: var(--gold-line); transform: translateY(-2px); }
+.cadence-chip.is-selected {
+  border-color: var(--gold);
+  background: linear-gradient(135deg, var(--gold-warm), var(--gold));
+  color: #1A1208;
+  box-shadow: 0 14px 30px -14px rgba(224, 184, 114, 0.6);
+}
+.maintenance-ctas { display: flex; flex-wrap: wrap; gap: 0.8rem; }
+.maintenance-micro {
+  margin-top: 0.9rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+/* =====================================================================
+   v6 — HERO VIDEO (replaces static after.jpg; reduced-motion → poster)
+   ===================================================================== */
+.hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: brightness(0.85) saturate(1.18) contrast(1.05);
+  opacity: 0;
+  transition: opacity 600ms var(--ease-out);
+  z-index: 1; /* the video fills the whole hero, edge to edge */
+}
+.hero-video.is-ready { opacity: 1; }
+/* The autoplay video replaces the before/after reveal, so retire the reveal label */
+.hero-meta { display: none; }
+
+/* Hero CTAs: Build my price + Text Gracie on top, Maintenance plans underneath (desktop) */
+#heroCtas { flex-direction: column; align-items: flex-start; gap: 0.9rem; }
+#heroCtas .hero-cta-row { display: flex; gap: 0.9rem; flex-wrap: wrap; }
+
+/* v6 responsive */
+@media (max-width: 860px) {
+  .maintenance-panel { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  #heroCtas { align-items: stretch; }
+  #heroCtas .hero-cta-row { flex-direction: column; }
+  .hero-ctas .btn,
+  .cfg-ctas .btn,
+  .maintenance-ctas .btn { width: 100%; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-video { display: none !important; }
 }

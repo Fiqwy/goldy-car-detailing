@@ -1,7 +1,7 @@
 // ============================================================
-// CONFIGURATOR — 2-step instant pricing
-// State: { vehicle, goal, package, priceEstimate }
-// Result step is rendered dynamically with mailto + IG CTAs.
+// CONFIGURATOR — 2-step instant pricing for the 3 set packages
+// State: { vehicle, goal }  →  package + price computed on demand.
+// (Custom / build-your-own lives in its own #build-your-own section.)
 // ============================================================
 
 export function currencyAU(n) {
@@ -27,7 +27,6 @@ export function initConfigurator(content) {
   if (!root) return;
 
   const state = { vehicle: null, goal: null };
-  const STEPS = ['1', '2', '3'];
 
   // ---- RENDER STEP 1: vehicle ----
   const vGrid = document.getElementById('cfgVehicleGrid');
@@ -92,60 +91,44 @@ function renderResult(content, state) {
   const pkg = content.packages.find(p => p.id === goal.packageId);
   const vehicle = content.sizeMultipliers[state.vehicle];
   const price = Math.round(pkg.priceFrom * vehicle.multiplier / 5) * 5; // round to nearest $5
-  const priceEstimate = currencyAU(price);
 
-  // Demo "next free" — static placeholder. Live: hook into Gracie's calendar.
-  const nextSlot = computeNextFree();
+  const TEL = "tel:+61427798045";
+  const PHONE = "0427 798 045";
+  const HEDGE = "Times are estimates so Gracie doesn't double-book her day.";
 
-  const mailtoBody = encodeURIComponent(
-    `Hi Gracie,\n\n` +
-    `I built a price using the site:\n\n` +
-    `Vehicle: ${vehicle.label}\n` +
-    `Goal: ${goal.label}\n` +
-    `Suggested package: ${pkg.tier}\n` +
-    `Estimate: ${priceEstimate}\n` +
-    `Slot I'd love: ${nextSlot}\n\n` +
-    `My name: \nPhone: \nSuburb: \n\n` +
+  const mailtoBody = encodeURIComponent([
+    `Hi Gracie,`, ``,
+    `I built a price using the site:`, ``,
+    `Vehicle: ${vehicle.label}`,
+    `Goal: ${goal.label}`,
+    `Suggested package: ${pkg.tier}`,
+    `Estimate: ${currencyAU(price)}`, ``,
+    `My name: `, `Phone: `, `Suburb: `, ``,
     `Cheers!`
-  );
-  const mailtoSubj = encodeURIComponent(`Booking enquiry — ${pkg.tier} for ${vehicle.label}`);
+  ].join('\n'));
+  const mailtoSubj = encodeURIComponent(`Booking enquiry: ${pkg.tier} for ${vehicle.label}`);
   const mailtoHref = `mailto:${content.booking.mailtoTarget}?subject=${mailtoSubj}&body=${mailtoBody}`;
 
-  const includes = pkg.includes.slice(0, 5).map(i => `<li>${i}</li>`).join('');
+  const includesList = pkg.includes.map(i => `<li>${i}</li>`).join('');
 
   document.getElementById('cfgResult').innerHTML = `
     <div class="cfg-result-head">
       <div>
         <div class="eyebrow"><span class="dot"></span> Suggested package</div>
         <div class="cfg-result-tier">${pkg.tier}</div>
-        <div style="color:var(--text-muted);font-size:0.9rem;margin-top:0.3rem;">${pkg.summary}</div>
+        <div class="cfg-result-summary">${pkg.summary}</div>
       </div>
-      <div class="cfg-price">${priceEstimate}<small>from · ${pkg.turnaround}</small></div>
+      <div class="cfg-price">${currencyAU(price)}<small>from · ${pkg.turnaround}</small></div>
     </div>
-    <ul class="cfg-includes">${includes}</ul>
-    <div class="cfg-slot">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gold);"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      Next free slot: <strong>${nextSlot}</strong>
-    </div>
-    <div class="hero-ctas" style="margin-top:0.4rem;">
+    <details class="cfg-includes-accordion">
+      <summary>What's included</summary>
+      <ul class="cfg-includes">${includesList}</ul>
+    </details>
+    <div class="hero-ctas cfg-ctas">
       <a href="${mailtoHref}" class="btn btn-primary">Book this slot <span class="arrow">→</span></a>
-      <a href="${content.booking.instagramDm}" class="btn btn-ghost">Message Gracie on Instagram</a>
+      <a href="${TEL}" class="btn btn-ghost">Call or text · ${PHONE}</a>
     </div>
-    <p style="margin-top:0.8rem;font-size:0.82rem;color:var(--text-muted);text-align:center;">
-      ${content.booking.responseTimeLabel} · Add-ons available at booking
-    </p>
+    <p class="cfg-hedge">${HEDGE}</p>
+    <p class="cfg-foot">${content.booking.responseTimeLabel} · Prefer to pick service by service? Build your own below.</p>
   `;
-}
-
-// Placeholder "next free" — picks the next weekday at 9am AEST.
-// Live version will read from Gracie's actual calendar.
-function computeNextFree() {
-  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const now = new Date();
-  // Skip 2 days forward, then bump past weekend if needed
-  let d = new Date(now);
-  d.setDate(now.getDate() + 2);
-  while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1);
-  return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}, 9:00am`;
 }
