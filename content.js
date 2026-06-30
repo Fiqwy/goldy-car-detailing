@@ -452,8 +452,8 @@ export const content = Object.freeze({
     name: "Goldy Car Detailing",
     description: "Mobile car detailing on the Gold Coast: cars, 4WDs, bikes, vans, motorhomes. Tidy up, Bring it back and Show-ready packages from $150. Female-owned. Direct with Gracie.",
     priceRange: "$$",
-    image: "https://fiqwy.github.io/goldy-car-detailing/assets/og/og-image.jpg",
-    url: "https://fiqwy.github.io/goldy-car-detailing/",
+    image: "https://goldycardetailing.com.au/assets/og/og-image.jpg",
+    url: "https://goldycardetailing.com.au/",
     telephone: "+61427798045",
     areaServed: { "@type": "City", name: "Gold Coast" },
     address: {
