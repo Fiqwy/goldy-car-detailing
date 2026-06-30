@@ -14,7 +14,6 @@ export const content = Object.freeze({
     tagline: "Showroom finish. At your driveway.",
     phone: "0427 798 045",                              // ✓ pulled from IG captions
     phoneHref: "tel:+61427798045",
-    email: "goldycardetailing@gmail.com",                // CONFIRM with Gracie
     instagram: "@goldycardetailing",
     instagramUrl: "https://www.instagram.com/goldycardetailing/",
     abn: "",                                             // CONFIRM
@@ -420,11 +419,10 @@ export const content = Object.freeze({
   },
 
   booking: {
-    mode: "mailto",
-    mailtoTarget: "goldycardetailing@gmail.com",          // CONFIRM
+    mode: "sms",                                          // SMS-first — Gracie books by text, no email
+    smsHref: "sms:+61427798045",                          // all booking actions resolve here (+ a pre-filled ?&body=)
     fallbackPhone: "0427 798 045",
     fallbackPhoneHref: "tel:+61427798045",
-    smsHref: "sms:+61427798045",
     responseTimeLabel: "Gracie replies in ~15 min during the day",
     instagramDm: "https://ig.me/m/goldycardetailing"
   },

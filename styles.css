@@ -276,7 +276,7 @@ section { padding-block: var(--gap-section); position: relative; }
   inset: 0;
   background: var(--bg-deep);
   z-index: 49;
-  padding: 6rem 6vw 2rem;
+  padding: 6rem 6vw calc(2rem + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -284,6 +284,7 @@ section { padding-block: var(--gap-section); position: relative; }
   transition: transform 420ms var(--ease-emph);
   height: 100dvh;
   overflow-y: auto;
+  overscroll-behavior: contain;   /* stop the page behind from scrolling on touch */
 }
 .drawer.is-open { transform: translateY(0); }
 .drawer a {
@@ -302,6 +303,7 @@ section { padding-block: var(--gap-section); position: relative; }
 .hero {
   position: relative;
   min-height: 100vh;
+  min-height: 100svh;
   min-height: 100dvh;
   display: flex;
   align-items: center;
@@ -543,7 +545,7 @@ section { padding-block: var(--gap-section); position: relative; }
 }
 .cfg-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(165px, 100%), 1fr));
   gap: 0.8rem;
 }
 .cfg-opt {
@@ -594,6 +596,9 @@ section { padding-block: var(--gap-section); position: relative; }
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+  min-height: 44px;            /* full touch target */
+  padding: 0.4rem 0.2rem;
+  margin-left: -0.2rem;
 }
 .cfg-back:hover { color: var(--text-primary); }
 
@@ -1014,7 +1019,7 @@ section { padding-block: var(--gap-section); position: relative; }
 }
 .suburb-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
   gap: 0.8rem;
 }
 .suburb-card {
@@ -1208,7 +1213,7 @@ section { padding-block: var(--gap-section); position: relative; }
   margin-bottom: 1rem;
 }
 .footer ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
-.footer a { color: var(--text-body); font-size: 0.92rem; transition: color 180ms var(--ease-out); }
+.footer a { color: var(--text-body); font-size: 0.92rem; display: inline-block; padding: 0.35rem 0; transition: color 180ms var(--ease-out); }
 .footer a:hover { color: var(--gold); }
 .footer-tag {
   font-family: var(--font-display);
@@ -1236,7 +1241,9 @@ section { padding-block: var(--gap-section); position: relative; }
 /* -------- FLOATING CALL (mobile) -------- */
 .float-call {
   position: fixed;
-  bottom: 1.2rem; right: 1.2rem;
+  /* clear the iPhone home indicator (env() is 0 where there's no inset) */
+  bottom: calc(1.2rem + env(safe-area-inset-bottom));
+  right: calc(1.2rem + env(safe-area-inset-right));
   z-index: 40;
   width: 56px; height: 56px;
   border-radius: 50%;
@@ -1323,6 +1330,14 @@ body.has-cursor .cursor-glow { opacity: 1; }
   /* Occasion rail becomes horizontal native swipe */
   .occasion-rail { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .occasion-track { transform: none !important; }
+
+  /* No hover on touch → these promoted layers cost GPU memory for zero benefit.
+     Let the browser promote on demand instead of pinning dozens of layers. */
+  .gallery-tile img,
+  .showcase-photo img,
+  .behind-tile img,
+  .featured-photo img,
+  .process-track { will-change: auto; }
 }
 
 @media (max-width: 640px) {
@@ -1342,6 +1357,8 @@ body.has-cursor .cursor-glow { opacity: 1; }
   .field-row { grid-template-columns: 1fr; }
   .cfg-result-head { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
   .float-call { display: flex; }
+  /* 16px minimum stops iOS Safari auto-zooming the page on input focus */
+  .field input, .field select, .field textarea { font-size: 16px; }
 }
 
 /* -------- REDUCED MOTION -------- */
@@ -1970,7 +1987,7 @@ body.has-cursor .cursor-glow { opacity: 1; }
 }
 .cfg-addons-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
   gap: 0.7rem;
 }
 .cfg-addon {
@@ -2029,8 +2046,9 @@ body.has-cursor .cursor-glow { opacity: 1; }
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  padding: 0.7rem 0.9rem;
-  margin-bottom: 0.5rem;
+  padding: 0.9rem 1rem;
+  min-height: 44px;
+  margin-bottom: 0.55rem;
   background: rgba(255, 255, 255, 0.025);
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
@@ -2168,7 +2186,8 @@ body.has-cursor .cursor-glow { opacity: 1; }
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--gold);
-  padding: 0.15rem 0;
+  padding: 0.55rem 0;
+  min-height: 44px;
 }
 .pkg-more > summary::-webkit-details-marker { display: none; }
 .pkg-more > summary::after {
@@ -2243,7 +2262,8 @@ body.has-cursor .cursor-glow { opacity: 1; }
   margin-bottom: 1.3rem;
 }
 .cadence-chip {
-  padding: 0.6rem 1.05rem;
+  padding: 0.8rem 1.15rem;
+  min-height: 44px;
   border-radius: var(--r-pill);
   border: 1px solid var(--line-strong);
   background: rgba(255, 255, 255, 0.04);

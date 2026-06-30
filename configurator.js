@@ -96,18 +96,11 @@ function renderResult(content, state) {
   const PHONE = "0427 798 045";
   const HEDGE = "Times are estimates so Gracie doesn't double-book her day.";
 
-  const mailtoBody = encodeURIComponent([
-    `Hi Gracie,`, ``,
-    `I built a price using the site:`, ``,
-    `Vehicle: ${vehicle.label}`,
-    `Goal: ${goal.label}`,
-    `Suggested package: ${pkg.tier}`,
-    `Estimate: ${currencyAU(price)}`, ``,
-    `My name: `, `Phone: `, `Suburb: `, ``,
-    `Cheers!`
-  ].join('\n'));
-  const mailtoSubj = encodeURIComponent(`Booking enquiry: ${pkg.tier} for ${vehicle.label}`);
-  const mailtoHref = `mailto:${content.booking.mailtoTarget}?subject=${mailtoSubj}&body=${mailtoBody}`;
+  // SMS-first: fold the build into a concise text body (SMS has no subject).
+  const smsBody = encodeURIComponent(
+    `Hi Gracie! Price builder: ${vehicle.label} · ${goal.label} · ${pkg.tier} · ${currencyAU(price)}. My name: , Suburb: `
+  );
+  const smsHref = `${content.booking.smsHref}?&body=${smsBody}`; // ?&body= works on both iOS + Android
 
   const includesList = pkg.includes.map(i => `<li>${i}</li>`).join('');
 
@@ -125,8 +118,8 @@ function renderResult(content, state) {
       <ul class="cfg-includes">${includesList}</ul>
     </details>
     <div class="hero-ctas cfg-ctas">
-      <a href="${mailtoHref}" class="btn btn-primary">Book this slot <span class="arrow">→</span></a>
-      <a href="${TEL}" class="btn btn-ghost">Call or text · ${PHONE}</a>
+      <a href="${smsHref}" class="btn btn-primary">Text my booking <span class="arrow">→</span></a>
+      <a href="${TEL}" class="btn btn-ghost">Call · ${PHONE}</a>
     </div>
     <p class="cfg-hedge">${HEDGE}</p>
     <p class="cfg-foot">${content.booking.responseTimeLabel} · Prefer to pick service by service? Build your own below.</p>

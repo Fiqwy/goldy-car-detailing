@@ -88,19 +88,15 @@ function renderMaintenance() {
   const bookEl = $('#maintBook');
   const enquireEl = $('#maintEnquire');
 
-  function mailto(subject, intro) {
-    const body = encodeURIComponent([
-      `Hi Gracie,`, ``,
-      intro, ``,
-      `Preferred cadence: ${cadence}`, ``,
-      `My name: `, `Phone: `, `Suburb: `, `Vehicle: `, ``,
-      `Cheers!`
-    ].join('\n'));
-    return `mailto:${content.booking.mailtoTarget}?subject=${encodeURIComponent(subject)}&body=${body}`;
+  function smsLink(intro) {
+    const body = encodeURIComponent(
+      `Hi Gracie! ${intro} Preferred cadence: ${cadence}. My name: , Suburb: , Vehicle: `
+    );
+    return `${content.booking.smsHref}?&body=${body}`;
   }
   function syncCtas() {
-    bookEl.href = mailto('Maintenance plan booking', "I'm a returning client and I'd like to book my next clean.");
-    enquireEl.href = mailto('Maintenance plan enquiry', "I'd like to enquire about joining your maintenance plan.");
+    bookEl.href = smsLink("I'm a returning client and I'd like to book my next clean.");
+    enquireEl.href = smsLink("I'd like to enquire about joining your maintenance plan.");
   }
   syncCtas();
 
@@ -242,28 +238,22 @@ function renderCustomBuilder() {
     selected.forEach(id => { const s = extras.find(x => x.id === id); if (s) t += s.price; });
     return t;
   }
-  function buildMailto() {
+  function buildSms() {
     const picked = [...selected].map(id => {
       const s = extras.find(x => x.id === id);
-      return s ? `- ${s.name} (+${currencyAU(s.price)})` : null;
+      return s ? `${s.name} (+${currencyAU(s.price)})` : null;
     }).filter(Boolean);
-    const lines = [
-      `Hi Gracie,`, ``,
-      `I built a custom detail on the site:`, ``,
-      `Base: ${BASE_NAME} (${currencyAU(BASE_PRICE)})`,
-      `Added:`,
-      ...(picked.length ? picked : ['- (nothing extra yet)']),
-      ``,
-      `Total: ${currencyAU(total())}`, ``,
-      `My name: `, `Phone: `, `Suburb: `, `Vehicle: `, ``,
-      `Cheers!`
-    ];
-    return `mailto:${content.booking.mailtoTarget}?subject=${encodeURIComponent('Custom build enquiry')}&body=${encodeURIComponent(lines.join('\n'))}`;
+    const body = encodeURIComponent(
+      `Hi Gracie! Custom detail from the site. Base: ${BASE_NAME} (${currencyAU(BASE_PRICE)}). ` +
+      `Added: ${picked.length ? picked.join(', ') : 'nothing extra yet'}. ` +
+      `Total: ${currencyAU(total())}. My name: , Suburb: , Vehicle: `
+    );
+    return `${content.booking.smsHref}?&body=${body}`;
   }
   function sync() {
     const t = total();
     totalEl.textContent = currencyAU(t);
-    bookEl.href = buildMailto();
+    bookEl.href = buildSms();
     let msg;
     if (t <= BASE_PRICE) msg = `That's the ${BASE_NAME} package. Add anything below and watch it climb.`;
     else if (t <= SHOWREADY) msg = `Building it up service by service. Show-ready does the lot for ${currencyAU(SHOWREADY)}, so a package usually works out cheaper.`;
@@ -456,7 +446,17 @@ function renderFaq() {
 
 function renderContact() {
   const b = content.booking;
+  const textHref = `${b.smsHref}?&body=${encodeURIComponent("Hi Gracie! I'd like to book a detail. My name: , Suburb: , Vehicle: ")}`;
   $('#contactChannels').innerHTML = `
+    <a class="channel" href="${textHref}">
+      <span class="channel-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></svg>
+      </span>
+      <div class="channel-meta">
+        <span class="channel-label">Text Gracie</span>
+        <span class="channel-value">${content.brand.phone}</span>
+      </div>
+    </a>
     <a class="channel" href="${content.brand.phoneHref}">
       <span class="channel-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
@@ -475,15 +475,6 @@ function renderContact() {
         <span class="channel-value">${content.brand.instagram}</span>
       </div>
     </a>
-    <a class="channel" href="mailto:${b.mailtoTarget}">
-      <span class="channel-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-      </span>
-      <div class="channel-meta">
-        <span class="channel-label">Email</span>
-        <span class="channel-value">${b.mailtoTarget}</span>
-      </div>
-    </a>
   `;
   $('#formNote').textContent = b.responseTimeLabel;
 }
@@ -495,9 +486,9 @@ function renderFooter() {
     `<li><a href="${s.built ? `suburbs/${s.slug}.html` : '#suburbs'}">${s.name}</a></li>`
   ).join('');
   $('#footerDirect').innerHTML = `
+    <li><a href="${content.booking.smsHref}?&body=${encodeURIComponent('Hi Gracie! ')}">Text Gracie</a></li>
     <li><a href="${content.brand.phoneHref}">${content.brand.phone}</a></li>
     <li><a href="${content.booking.instagramDm}">${content.brand.instagram}</a></li>
-    <li><a href="mailto:${content.booking.mailtoTarget}">Email Gracie</a></li>
   `;
   $('#footerCopy').textContent = `© ${new Date().getFullYear()} ${content.brand.name}${content.brand.abn ? ` · ABN ${content.brand.abn}` : ''}`;
 }
@@ -616,25 +607,30 @@ function runOverture() {
 // ============================================================
 // 3. LENIS + SCROLLTRIGGER BRIDGE
 // ============================================================
+// Smooth WHEEL on desktop; on touch devices Lenis hands scrolling back to the
+// OS (syncTouch:false) so mobile gets native momentum — no JS fighting the finger.
 const lenis = new Lenis({
   duration: 1.15,
   easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
   smoothWheel: true,
-  touchMultiplier: 1.5,
+  syncTouch: false,
   wheelMultiplier: 1
 });
-function rafLoop(time) {
-  lenis.raf(time);
-  requestAnimationFrame(rafLoop);
-}
-requestAnimationFrame(rafLoop);
 
 if (window.ScrollTrigger) {
   gsap.registerPlugin(ScrollTrigger);
-  ScrollTrigger.normalizeScroll(true);
+  // normalizeScroll hijacks native touch scrolling — only safe on non-touch.
+  // On phones it fought Lenis/native and was a primary cause of janky scroll.
+  if (!NO_HOVER) ScrollTrigger.normalizeScroll(true);
   lenis.on('scroll', ScrollTrigger.update);
+  // Drive Lenis from a SINGLE source (the GSAP ticker). The previous code also
+  // ran a manual requestAnimationFrame loop, double-stepping scroll every frame.
   gsap.ticker.add(time => lenis.raf(time * 1000));
   gsap.ticker.lagSmoothing(0);
+} else {
+  // Fallback driver only when ScrollTrigger isn't present.
+  function rafLoop(time) { lenis.raf(time); requestAnimationFrame(rafLoop); }
+  requestAnimationFrame(rafLoop);
 }
 
 // Anchor-link smooth scroll via Lenis
@@ -646,7 +642,12 @@ document.addEventListener('click', e => {
   const target = document.querySelector(id);
   if (target) {
     e.preventDefault();
-    lenis.scrollTo(target, { offset: -60, duration: 1.2 });
+    if (lenis && lenis.scrollTo) {
+      lenis.scrollTo(target, { offset: -60, duration: NO_HOVER ? 0.6 : 1.2 });
+    } else {
+      const y = target.getBoundingClientRect().top + window.scrollY - 60;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
     closeDrawer();
   }
 });
@@ -660,19 +661,33 @@ const drawer = $('#drawer');
 
 function openDrawer() {
   drawer.classList.add('is-open');
+  drawer.removeAttribute('inert');
   drawer.setAttribute('aria-hidden', 'false');
   burger.setAttribute('aria-expanded', 'true');
   document.body.style.overflow = 'hidden';
+  if (lenis && lenis.stop) lenis.stop();           // pause smooth-scroller while menu is open
+  const first = drawer.querySelector('a');
+  if (first) first.focus();
 }
 function closeDrawer() {
+  if (!drawer.classList.contains('is-open')) return;
   drawer.classList.remove('is-open');
+  drawer.setAttribute('inert', '');                 // not tabbable while off-screen
   drawer.setAttribute('aria-hidden', 'true');
   burger.setAttribute('aria-expanded', 'false');
   document.body.style.overflow = '';
+  if (lenis && lenis.start) lenis.start();
 }
 burger.addEventListener('click', () => {
   const open = burger.getAttribute('aria-expanded') === 'true';
   open ? closeDrawer() : openDrawer();
+});
+// Escape closes the drawer and returns focus to the burger
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && drawer.classList.contains('is-open')) {
+    closeDrawer();
+    burger.focus();
+  }
 });
 
 window.addEventListener('scroll', () => {
@@ -789,14 +804,17 @@ if (window.ScrollTrigger && !REDUCED) {
     }
   });
 
-  // Gallery tile float
-  $$('.gallery-tile img').forEach(img => {
-    gsap.fromTo(img, { y: -8 }, {
-      y: 8,
-      ease: 'none',
-      scrollTrigger: { trigger: img, start: 'top bottom', end: 'bottom top', scrub: 1.5 }
+  // Gallery tile float — desktop only. One scrub trigger PER image is costly on
+  // mobile (each repositions a layer every scroll frame) and adds to scroll jank.
+  if (!NO_HOVER) {
+    $$('.gallery-tile img').forEach(img => {
+      gsap.fromTo(img, { y: -8 }, {
+        y: 8,
+        ease: 'none',
+        scrollTrigger: { trigger: img, start: 'top bottom', end: 'bottom top', scrub: 1.5 }
+      });
     });
-  });
+  }
 }
 
 // ============================================================
@@ -822,7 +840,8 @@ if (window.ScrollTrigger && !REDUCED) {
 // 10. PROCESS — HORIZONTAL PINNED (desktop ≥1025)
 // ============================================================
 function initProcessTimeline() {
-  if (window.innerWidth < 1025 || REDUCED || !window.ScrollTrigger) return;
+  // Desktop hover devices only — pin+scrub is unreliable/janky on touch (incl. tablets ≥1025).
+  if (window.innerWidth < 1025 || NO_HOVER || REDUCED || !window.ScrollTrigger) return;
   const track = $('#processTrack');
   const wrap = $('#processTrackWrap');
   if (!track || !wrap) return;
@@ -853,7 +872,10 @@ initProcessTimeline();
 // 11. WEBGL HERO SHADER — dust + light leak (hand-rolled)
 // ============================================================
 function initHeroShader() {
-  if (REDUCED) return;
+  // Desktop only. A full-screen per-pixel fragment shader (screen-blended over
+  // the hero video) every frame is the single biggest GPU/battery drain on
+  // phones — and the video already carries the hero visually there.
+  if (REDUCED || NO_HOVER || window.innerWidth < 1025) return;
   const canvas = $('#heroShader');
   if (!canvas) return;
   const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: false, antialias: false });
@@ -972,19 +994,17 @@ function initHeroShader() {
 }
 
 // ============================================================
-// 12. CONTACT FORM — mailto fallback (no real submit yet)
+// 12. CONTACT FORM — hands off to SMS to Gracie (no server submit yet)
 // ============================================================
 $('#contactForm').addEventListener('submit', e => {
   e.preventDefault();
   const data = new FormData(e.target);
-  const subj = encodeURIComponent(`New enquiry — ${data.get('name') || 'Goldy site'}`);
   const body = encodeURIComponent(
-    `Name: ${data.get('name') || '-'}\n` +
-    `Phone: ${data.get('phone') || '-'}\n` +
-    `Vehicle: ${data.get('vehicle') || '-'}\n\n` +
-    `Message:\n${data.get('message') || '-'}`
+    `Hi Gracie! New enquiry from ${data.get('name') || 'the site'}. ` +
+    `Phone: ${data.get('phone') || '-'}. Vehicle: ${data.get('vehicle') || '-'}. ` +
+    `${data.get('message') || ''}`
   );
-  window.location.href = `mailto:${content.booking.mailtoTarget}?subject=${subj}&body=${body}`;
+  window.location.href = `${content.booking.smsHref}?&body=${body}`;
 });
 
 // ============================================================
