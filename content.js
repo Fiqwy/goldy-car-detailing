@@ -413,7 +413,7 @@ export const content = Object.freeze({
   founder: {
     name: "Gracie",                                       // CONFIRM full name
     role: "Owner & detailer",
-    photo: "assets/founder/gracie.jpg",                   // ig-02 "I Know Ball"
+    photo: "assets/founder/gracie.jpg",                   // Gracie at work — Prado + her two goldens (client-supplied 2026-06-30)
     bio: "Gold Coast born and based. Goldy is owner-operated — Gracie does every booking herself, from the inspection to the handover. She started it because she couldn't find a detailer who treated every car like the one in their own garage. Now her returning clients book her months out, and her work speaks for itself in the gallery above. Female-owned, no-nonsense, no shortcuts.",  // CONFIRM — Nicholas to polish
     signature: "— G."
   },
