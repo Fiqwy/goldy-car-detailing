@@ -9,9 +9,24 @@ const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const NO_HOVER = matchMedia('(hover: none)').matches;
 document.documentElement.classList.add('has-js');
 
-// Set by the condition slider, read by the contact form. Stays null until the
+// Set by the condition slider, read by every booking path. Stays null until the
 // visitor actually moves it — a default we picked for them isn't their answer.
 let conditionPick = null;
+
+// Every booking link carries the visitor's condition pick so Gracie can see what
+// she's walking into before she quotes. Any anchor with a data-sms-body gets its
+// href rebuilt from that base plus the current condition.
+function conditionSuffix() {
+  return conditionPick ? `Condition: ${conditionPick.label} (suggested ${conditionPick.tier}). ` : '';
+}
+function buildSmsHref(baseBody) {
+  return `${content.booking.smsHref}?&body=${encodeURIComponent(baseBody + conditionSuffix())}`;
+}
+function refreshSmsLinks() {
+  document.querySelectorAll('[data-sms-body]').forEach(a => { a.href = buildSmsHref(a.dataset.smsBody); });
+}
+// configurator.js re-renders its CTA on demand and fires this when it does.
+document.addEventListener('goldy:sms-refresh', refreshSmsLinks);
 
 // ============================================================
 // 0. CONTENT RENDER — populate everything from content.js
@@ -40,7 +55,7 @@ function renderHero() {
   $('#heroCtas').innerHTML = `
     <div class="hero-cta-row">
       <a href="${h.primaryCta.href}" class="btn btn-primary">${h.primaryCta.label} <span class="arrow">→</span></a>
-      <a href="${h.secondaryCta.href}" class="btn btn-ghost">${h.secondaryCta.label}</a>
+      <a href="${h.secondaryCta.href}" class="btn btn-ghost" data-sms-body="Hi Gracie! I'd like to book a detail. My name: , Suburb: , Vehicle: ">${h.secondaryCta.label}</a>
     </div>
     <a href="${h.maintenanceCta.href}" class="btn btn-ghost btn-maint">${h.maintenanceCta.label} <span class="arrow">→</span></a>
   `;
@@ -92,15 +107,11 @@ function renderMaintenance() {
   const bookEl = $('#maintBook');
   const enquireEl = $('#maintEnquire');
 
-  function smsLink(intro) {
-    const body = encodeURIComponent(
-      `Hi Gracie! ${intro} Preferred cadence: ${cadence}. My name: , Suburb: , Vehicle: `
-    );
-    return `${content.booking.smsHref}?&body=${body}`;
-  }
   function syncCtas() {
-    bookEl.href = smsLink("I'm a returning client and I'd like to book my next clean.");
-    enquireEl.href = smsLink("I'd like to enquire about joining your maintenance plan.");
+    const body = intro => `Hi Gracie! ${intro} Preferred cadence: ${cadence}. My name: , Suburb: , Vehicle: `;
+    bookEl.dataset.smsBody = body("I'm a returning client and I'd like to book my next clean.");
+    enquireEl.dataset.smsBody = body("I'd like to enquire about joining your maintenance plan.");
+    refreshSmsLinks();
   }
   syncCtas();
 
@@ -242,22 +253,20 @@ function renderCustomBuilder() {
     selected.forEach(id => { const s = extras.find(x => x.id === id); if (s) t += s.price; });
     return t;
   }
-  function buildSms() {
+  function buildSmsBody() {
     const picked = [...selected].map(id => {
       const s = extras.find(x => x.id === id);
       return s ? `${s.name} (+${currencyAU(s.price)})` : null;
     }).filter(Boolean);
-    const body = encodeURIComponent(
-      `Hi Gracie! Custom detail from the site. Base: ${BASE_NAME} (${currencyAU(BASE_PRICE)}). ` +
+    return `Hi Gracie! Custom detail from the site. Base: ${BASE_NAME} (${currencyAU(BASE_PRICE)}). ` +
       `Added: ${picked.length ? picked.join(', ') : 'nothing extra yet'}. ` +
-      `Total: ${currencyAU(total())}. My name: , Suburb: , Vehicle: `
-    );
-    return `${content.booking.smsHref}?&body=${body}`;
+      `Total: ${currencyAU(total())}. My name: , Suburb: , Vehicle: `;
   }
   function sync() {
     const t = total();
     totalEl.textContent = currencyAU(t);
-    bookEl.href = buildSms();
+    bookEl.dataset.smsBody = buildSmsBody();
+    refreshSmsLinks();
     let msg;
     if (t <= BASE_PRICE) msg = `That's the ${BASE_NAME} package. Add anything below and watch it climb.`;
     else if (t <= SHOWREADY) msg = `Building it up service by service. Show-ready does the lot for ${currencyAU(SHOWREADY)}, so a package usually works out cheaper.`;
@@ -541,6 +550,12 @@ function renderCondition() {
   const START = Math.min(c.defaultIndex == null ? Math.floor(levels.length / 2) : c.defaultIndex, last);
   const pkgOf = i => content.packages.find(p => p.id === levels[i].packageId);
 
+  // Continuous 0–100 track so the grime builds smoothly under the finger; the
+  // five named levels are bands derived from that value.
+  const MAXV = 100;
+  const bandOf = v => Math.min(last, Math.floor(v / (MAXV / levels.length)));
+  const startV = Math.round((START + 0.5) * (MAXV / levels.length));
+
   mount.innerHTML = `
     <div class="section-head">
       <p class="eyebrow"><span class="dot"></span> ${c.eyebrow}</p>
@@ -550,13 +565,16 @@ function renderCondition() {
     <div class="cond-panel" id="condPanel" data-reveal>
       <div class="cond-visual">
         <figure class="cond-stage" id="condStage">
-          <img class="cond-img cond-img-dirty" src="${c.photoDirty.src}" alt="${c.photoDirty.alt}" loading="lazy" decoding="async">
-          <img class="cond-img cond-img-clean" src="${c.photoClean.src}" alt="${c.photoClean.alt}" loading="lazy" decoding="async">
-          <span class="cond-grade" aria-hidden="true"></span>
+          <img class="cond-base" src="${c.photoClean.src}" alt="${c.photoClean.alt}" loading="lazy" decoding="async">
+          <span class="cond-l cond-shine" aria-hidden="true"></span>
+          <span class="cond-l cond-dust"  aria-hidden="true"></span>
+          <span class="cond-l cond-grime" aria-hidden="true"></span>
+          <span class="cond-l cond-grain" aria-hidden="true"></span>
+          <span class="cond-l cond-vig"   aria-hidden="true"></span>
         </figure>
         <label class="cond-label" for="condRange">${c.sliderLabel}</label>
-        <input class="cond-range" id="condRange" type="range" min="0" max="${last}" step="1"
-               value="${START}" aria-valuetext="${levels[START].label}">
+        <input class="cond-range" id="condRange" type="range" min="0" max="${MAXV}" step="1"
+               value="${startV}" aria-valuetext="${levels[START].label}">
         <div class="cond-ends" aria-hidden="true">
           <span>${levels[0].label}</span><span>${levels[last].label}</span>
         </div>
@@ -580,24 +598,36 @@ function renderCondition() {
   const range = $('#condRange');
   const smsEl = $('#condSms');
   let touched = false;
+  let lastBand = -1;
 
-  function sync(i) {
+  function sync(v) {
+    const t = v / MAXV;                       // 0..1 continuous
+    const i = bandOf(v);
     const l = levels[i], p = pkgOf(i);
-    panel.style.setProperty('--wipe', i / last);  // linear — seam tracks the handle
-    panel.style.setProperty('--dirt', l.dirt);    // non-linear — bad end reads dirtier
-    $('#condLevel').textContent = l.label;
-    $('#condBlurb').textContent = l.blurb;
-    $('#condSuggest').innerHTML = `
-      <span class="cond-suggest-label">Probably</span>
-      <span class="cond-suggest-tier">${p.tier}</span>
-      <span class="cond-suggest-price">${currencyAU(p.priceFrom)}<small>from</small></span>`;
+
+    // Two curves: `dirt` drives the grime layers (eased so the rough end
+    // ramps hardest), `wipe` stays linear for the track fill.
+    panel.style.setProperty('--wipe', t);
+    panel.style.setProperty('--dirt', t.toFixed(4));  // linear: every layer is linear in --dirt, so the five steps land evenly
+
+    if (i !== lastBand) {                     // text only changes on band change
+      lastBand = i;
+      $('#condLevel').textContent = l.label;
+      $('#condBlurb').textContent = l.blurb;
+      $('#condSuggest').innerHTML = `
+        <span class="cond-suggest-label">Probably</span>
+        <span class="cond-suggest-tier">${p.tier}</span>
+        <span class="cond-suggest-price">${currencyAU(p.priceFrom)}<small>from</small></span>`;
+      range.setAttribute('aria-valuetext', `${l.label} — ${p.tier}`);
+    }
+    // The slider's own CTA always states the current position.
     smsEl.href = `${content.booking.smsHref}?&body=${encodeURIComponent(
-      `Hi Gracie! ${c.smsIntro}: ${l.label} (${i + 1}/${levels.length}). ` +
-      `Looks like ${p.tier} (${currencyAU(p.priceFrom)} from). My name: , Suburb: , Vehicle: `
+      `Hi Gracie! ${c.smsIntro}: ${l.label}. Looks like ${p.tier} ` +
+      `(${currencyAU(p.priceFrom)} from). My name: , Suburb: , Vehicle: `
     )}`;
-    range.setAttribute('aria-valuetext', `${l.label} — ${p.tier}`);
     conditionPick = touched ? { label: l.label, tier: p.tier } : null;
     syncConditionChip();
+    refreshSmsLinks();   // carry the pick into every other booking link
   }
 
   range.addEventListener('input', () => { touched = true; sync(+range.value); });
@@ -614,8 +644,8 @@ function renderCondition() {
     let dragging = false;
     const setFromX = e => {
       const r = stage.getBoundingClientRect();
-      const i = Math.round(Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * last);
-      if (i !== +range.value) { range.value = i; touched = true; sync(i); }
+      const v = Math.round(Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * MAXV);
+      if (v !== +range.value) { range.value = v; touched = true; sync(v); }
     };
     stage.addEventListener('pointerdown', e => {
       dragging = true; dragOn(); stage.setPointerCapture(e.pointerId); setFromX(e);
@@ -627,7 +657,7 @@ function renderCondition() {
     }));
   }
 
-  sync(START);   // touched === false, so conditionPick stays null
+  sync(startV);   // touched === false, so conditionPick stays null
 }
 
 // Mirrors the chosen condition into the contact form so the visitor can see
@@ -647,9 +677,8 @@ document.addEventListener('click', e => {
 
 function renderContact() {
   const b = content.booking;
-  const textHref = `${b.smsHref}?&body=${encodeURIComponent("Hi Gracie! I'd like to book a detail. My name: , Suburb: , Vehicle: ")}`;
   $('#contactChannels').innerHTML = `
-    <a class="channel" href="${textHref}">
+    <a class="channel" href="${b.smsHref}" data-sms-body="Hi Gracie! I'd like to book a detail. My name: , Suburb: , Vehicle: ">
       <span class="channel-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></svg>
       </span>
@@ -687,7 +716,7 @@ function renderFooter() {
     `<li><a href="${s.built ? `suburbs/${s.slug}.html` : '#suburbs'}">${s.name}</a></li>`
   ).join('');
   $('#footerDirect').innerHTML = `
-    <li><a href="${content.booking.smsHref}?&body=${encodeURIComponent('Hi Gracie! ')}">Text Gracie</a></li>
+    <li><a href="${content.booking.smsHref}" data-sms-body="Hi Gracie! ">Text Gracie</a></li>
     <li><a href="${content.brand.phoneHref}">${content.brand.phone}</a></li>
     <li><a href="${content.booking.instagramDm}">${content.brand.instagram}</a></li>
   `;

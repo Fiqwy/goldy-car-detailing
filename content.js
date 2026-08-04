@@ -38,7 +38,7 @@ export const content = Object.freeze({
     secondaryCta: { label: "Text Gracie · 0427 798 045", href: "sms:+61427798045" },
     video: "assets/hero/hero.mp4",          // H.264, no audio, poster = after.jpg; reduced-motion bails to poster
     beforeAfter: {
-      before: "assets/hero/before.jpg",       // ig-17 HSV Clubsport (dimmed via CSS filter)
+      before: "assets/hero/after.jpg",       // ig-17 HSV Clubsport (dimmed via CSS filter)
       after:  "assets/hero/after.jpg",        // ig-17 HSV Clubsport (vivid via CSS filter)
       label:  "Scroll to see the difference"
     }
@@ -242,13 +242,9 @@ export const content = Object.freeze({
     defaultIndex: 2,
     photoClean: {
       src: "assets/condition/clean.jpg",
-      alt: "Prado interior from the open tailgate — vacuumed, nothing on the floor"
+      alt: "Car interior used as the reference scale — drag the slider to show how dirty yours is"
     },
-    photoDirty: {
-      src: "assets/condition/dirty.jpg",
-      alt: "The same angle on a Prado interior — dusty, sandy, lived in"
-    },
-    photoNote: "A reference scale for your car, not a before-and-after of a job. The rough end is styled darker so it reads as worst case.",
+    photoNote: "A reference scale for your car, not a before-and-after of a job. The grime is drawn on as you slide so you can dial in roughly how yours looks.",
     disclaimer: "This isn't a quote. It just tells Gracie what she's walking into.",
     ctaLabel: "Text Gracie this",
     secondaryCtaLabel: "Or use the form",
@@ -289,13 +285,11 @@ export const content = Object.freeze({
 
     // ---- BIKES (4) — Harley touring + side + Road Glide + Suzuki ----
     { src: "assets/gallery/16-harley-touring.jpg",        alt: "Harley-Davidson touring — rear 3/4 after detail",           category: "bikes"   },
-    { src: "assets/gallery/17-harley-side.jpg",           alt: "Harley-Davidson — side profile, polished + protected",      category: "bikes"   },
     { src: "assets/gallery/23-harley-roadglide.jpg",      alt: "Harley-Davidson Road Glide — black + brown leather, detailed", category: "bikes"   },
-    { src: "assets/gallery/18-suzuki-vz1500.jpg",         alt: "Suzuki VZ1500 — mid-wash, motorcycle detail",               category: "bikes"   },
+    { src: "assets/bikes/01-suzuki-vz1500.jpg",         alt: "Suzuki VZ1500 — mid-wash, motorcycle detail",               category: "bikes"   },
 
     // ---- VANS & TRADES (4) — RVs in her IG highlights (login-walled, see HANDOFF) ----
     { src: "assets/gallery/19-hiace-van.jpg",             alt: "Toyota Hiace Van — detail refresher",               category: "vans"    },
-    { src: "assets/gallery/20-hiace-wheel-detail.jpg",    alt: "Hiace wheel + bodywork detail — bronze rim, white panel",   category: "vans"    },
     { src: "assets/gallery/21-dog-van.jpg",               alt: "Dog-grooming work van — de-dog-hairing + deep interior",    category: "vans"    },
     { src: "assets/gallery/22-work-ute.jpg",              alt: "Work ute — even work utes deserve some love",               category: "vans"    },
 

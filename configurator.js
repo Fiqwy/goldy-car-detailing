@@ -97,10 +97,10 @@ function renderResult(content, state) {
   const HEDGE = "Times are estimates so Gracie doesn't double-book her day.";
 
   // SMS-first: fold the build into a concise text body (SMS has no subject).
-  const smsBody = encodeURIComponent(
-    `Hi Gracie! Price builder: ${vehicle.label} · ${goal.label} · ${pkg.tier} · ${currencyAU(price)}. My name: , Suburb: `
-  );
-  const smsHref = `${content.booking.smsHref}?&body=${smsBody}`; // ?&body= works on both iOS + Android
+  // The href itself is composed by script.js from data-sms-body so the
+  // visitor's condition pick rides along; this is the fallback if that misses.
+  const smsBody = `Hi Gracie! Price builder: ${vehicle.label} · ${goal.label} · ${pkg.tier} · ${currencyAU(price)}. My name: , Suburb: `;
+  const smsHref = `${content.booking.smsHref}?&body=${encodeURIComponent(smsBody)}`;
 
   const includesList = pkg.includes.map(i => `<li>${i}</li>`).join('');
 
@@ -118,10 +118,13 @@ function renderResult(content, state) {
       <ul class="cfg-includes">${includesList}</ul>
     </details>
     <div class="hero-ctas cfg-ctas">
-      <a href="${smsHref}" class="btn btn-primary">Text my booking <span class="arrow">→</span></a>
+      <a href="${smsHref}" data-sms-body="${smsBody.replace(/"/g, '&quot;')}" class="btn btn-primary">Text my booking <span class="arrow">→</span></a>
       <a href="${TEL}" class="btn btn-ghost">Call · ${PHONE}</a>
     </div>
     <p class="cfg-hedge">${HEDGE}</p>
     <p class="cfg-foot">${content.booking.responseTimeLabel} · Prefer to pick service by service? Build your own below.</p>
   `;
+
+  // Let script.js fold the visitor's condition pick into this fresh CTA.
+  document.dispatchEvent(new CustomEvent('goldy:sms-refresh'));
 }

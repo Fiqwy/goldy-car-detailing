@@ -2344,7 +2344,7 @@ body.has-cursor .cursor-glow { opacity: 1; }
   background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-elev) 100%);
   border: 1px solid var(--gold-line);
   border-radius: var(--r-lg);
-  transition: --wipe 260ms var(--ease-out), --dirt 260ms var(--ease-out);
+  transition: --wipe 120ms var(--ease-out), --dirt 120ms var(--ease-out);
 }
 /* While a finger/mouse is down: track instantly, no rubber-banding. */
 .cond-panel.is-dragging { transition: none; }
@@ -2356,41 +2356,77 @@ body.has-cursor .cursor-glow { opacity: 1; }
   aspect-ratio: 3 / 4;          /* matches the exported photo pair exactly */
   border-radius: var(--r);
   overflow: hidden;
+  isolation: isolate;
   background: var(--bg-elev);
   border: 1px solid var(--line);
 }
-.cond-img {
+/* ---- The grime engine ----------------------------------------------------
+   ONE real photo underneath; every bit of dirt above it is drawn by CSS and
+   driven by --dirt, so it builds and lifts continuously as the handle moves
+   instead of cutting between two stills. Layers are plain opacity/blend work
+   (compositor-only) apart from one cheap filter on the base image. */
+.cond-base {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
-}
-/* The grade — static per level, so at most 4 re-rasters across a drag. */
-.cond-img-dirty {
-  z-index: 1;
+  z-index: 0;
   filter:
-    saturate(calc(1 - var(--dirt) * 0.30))
-    contrast(calc(1 + var(--dirt) * 0.10))
-    brightness(calc(1 - var(--dirt) * 0.12))
-    sepia(calc(var(--dirt) * 0.16));
+    saturate(calc(1 - var(--dirt) * 0.24))
+    brightness(calc(1 - var(--dirt) * 0.09))
+    contrast(calc(1 + var(--dirt) * 0.02));
 }
-/* The two reference photos are different vehicles shot at different distances,
-   so a hard wipe seam would read as a broken join. Cross-fade instead: the
-   clean photo fades out as the handle moves right and the graded dirty photo
-   takes over. Opacity only — pure compositing, no per-frame raster. */
-/* Steep on purpose: the two "clean" levels sit fully on the clean photo and
-   the three "rough" levels fully on the dirty one, so you're always looking at
-   a real photo rather than a ghosted blend of both. The 260ms transition makes
-   the hand-off smooth, and the grading ramp differentiates within each half. */
-.cond-img-clean { z-index: 2; opacity: clamp(0, calc(2 - var(--wipe) * 4), 1); }
+.cond-l { position: absolute; inset: 0; pointer-events: none; }
 
-/* Dust/haze wash over the dirty photo, opacity driven by the grading ramp. */
-.cond-grade {
-  position: absolute; inset: 0; z-index: 3;
-  pointer-events: none;
-  opacity: calc(var(--dirt) * 0.42);
+/* Fresh-off-the-detail gloss — only present at the clean end, so sliding back
+   toward "Pretty clean" visibly lifts the car rather than just removing dirt. */
+.cond-shine {
+  z-index: 1;
+  opacity: calc((1 - var(--dirt)) * 0.55);
+  mix-blend-mode: screen;
   background:
-    radial-gradient(130% 100% at 50% 12%, rgba(120,102,72,0) 32%, rgba(58,48,34,0.8) 100%),
-    linear-gradient(180deg, rgba(122,104,74,0.24) 0%, rgba(60,50,36,0.5) 100%);
+    linear-gradient(115deg, transparent 34%, rgba(255,252,240,0.30) 47%, rgba(255,255,255,0.06) 55%, transparent 66%),
+    radial-gradient(70% 44% at 26% 16%, rgba(255,250,235,0.26), transparent 70%);
+}
+
+/* Warm dust haze — the first thing to appear, settles over everything. */
+.cond-dust {
+  z-index: 2;
+  opacity: calc(var(--dirt) * 0.30);
+  background:
+    radial-gradient(120% 88% at 50% 8%, rgba(146,126,90,0) 30%, rgba(74,62,44,0.78) 100%),
+    linear-gradient(180deg, rgba(150,130,96,0.30) 0%, rgba(72,60,42,0.44) 100%);
+}
+
+/* Blotchy ground-in grime — coarse turbulence, multiplied so it darkens into
+   the shadows the way real dirt collects. Scales up slightly as it builds. */
+.cond-grime {
+  z-index: 3;
+  opacity: calc(var(--dirt) * 0.72);
+  mix-blend-mode: multiply;
+  transform: scale(calc(1 + var(--dirt) * 0.04));
+  background-size: cover;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='560'%3E%3Cfilter id='g' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.018 0.028' numOctaves='4' seed='7'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.42 0 0 0 0 0.35 0 0 0 0 0.24 0 0 0 -3.2 1.9'/%3E%3C/filter%3E%3Crect width='420' height='560' filter='url(%23g)'/%3E%3C/svg%3E");
+  -webkit-mask-image: linear-gradient(180deg, transparent 6%, rgba(0,0,0,0.3) 28%, #000 60%);
+  mask-image: linear-gradient(180deg, transparent 6%, rgba(0,0,0,0.3) 28%, #000 60%);
+}
+
+/* Fine dust/sand grain sitting on the surfaces. */
+.cond-grain {
+  z-index: 4;
+  opacity: calc(var(--dirt) * 0.55);
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='3' seed='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  -webkit-mask-image: linear-gradient(180deg, transparent 6%, rgba(0,0,0,0.3) 28%, #000 60%);
+  mask-image: linear-gradient(180deg, transparent 6%, rgba(0,0,0,0.3) 28%, #000 60%);
+}
+
+/* Edge grime — dirt always builds up worst around the edges and footwells. */
+.cond-vig {
+  z-index: 5;
+  opacity: calc(var(--dirt) * 0.50);
+  background:
+    radial-gradient(88% 70% at 50% 42%, transparent 42%, rgba(28,22,14,0.62) 100%),
+    linear-gradient(0deg, rgba(34,27,17,0.55) 0%, transparent 34%);
 }
 
 .cond-label {
