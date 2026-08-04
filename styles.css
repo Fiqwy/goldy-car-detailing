@@ -781,154 +781,156 @@ section { padding-block: var(--gap-section); position: relative; }
 .pkg-cta { margin-top: auto; padding-top: 0.4rem; }
 .pkg-cta .btn { width: 100%; justify-content: center; }
 
-/* -------- PROCESS TIMELINE -------- */
-.process {
-  background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-deep) 100%);
-  overflow: hidden;
-}
-.process-track-wrap {
-  position: relative;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-}
-.process-track {
-  display: flex;
-  gap: 2vw;
-  padding-inline: 4vw;
-  will-change: transform;
-}
-.process-card {
-  flex: 0 0 min(680px, 80vw);
-  background: linear-gradient(180deg, var(--bg-card-2) 0%, var(--bg-elev) 100%);
-  border: 1px solid var(--line);
-  border-radius: var(--r-lg);
-  padding: 2rem;
-  display: grid;
-  grid-template-columns: 1.05fr 1fr;
-  gap: 2rem;
-  align-items: center;
-  box-shadow: var(--shadow-card);
-}
-.process-card-text { padding: 1rem; }
-.process-step {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 4rem;
-  letter-spacing: -0.05em;
-  background: linear-gradient(95deg, var(--gold-warm), var(--gold-deep));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  line-height: 1;
-  margin-bottom: 0.8rem;
-}
-.process-title {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 1.7rem;
-  letter-spacing: -0.02em;
-  margin-bottom: 0.7rem;
-}
-.process-body { font-size: 0.98rem; color: var(--text-body); line-height: 1.6; }
-.process-img {
-  position: relative;
-  aspect-ratio: 4/5;
-  border-radius: var(--r);
-  overflow: hidden;
-  background: var(--bg-elev);
-}
-.process-img img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-}
-
-/* Mobile fallback (stacked) is in @media below */
-
 /* -------- GALLERY -------- */
 .gallery {
   background: var(--bg-deep);
 }
-.gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-auto-rows: 240px;
-  gap: 1rem;
-  margin-top: var(--gap-inner);
+
+/* -------- WORK RAILS (v7) --------
+   Rail 1 = every photo. Rail 2 = category cards that filter Rail 1.
+   Native overflow-x at EVERY breakpoint — the old .occasion-rail was
+   overflow:hidden above 1025px with no scroll driver, so its tail cards
+   were unreachable. No will-change: nothing transforms these tracks. */
+.rail-wrap { position: relative; margin-top: var(--gap-inner); }
+
+.rail {
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;   /* no scroll-chaining / iOS back-swipe */
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;         /* proximity never fights a fast flick */
+  scroll-padding-inline: 4vw;
+  scrollbar-width: none;
 }
-.gallery-tile {
+.rail::-webkit-scrollbar { display: none; }
+.rail:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; border-radius: var(--r); }
+
+.rail-track {
+  display: flex;
+  gap: 1rem;
+  padding-inline: 4vw;
+  padding-block: 0.4rem;
+}
+/* Guards the trailing inset in engines that drop end padding on overflow. */
+.rail-track::after { content: ''; flex: 0 0 1px; }
+
+/* One composited animation on the TRACK when the filter changes — never 30
+   per-card transitions. */
+.work-track.is-swapping { animation: railSwap 260ms var(--ease-out); }
+@keyframes railSwap {
+  from { opacity: 0.35; transform: translate3d(-10px, 0, 0); }
+  to   { opacity: 1;    transform: translate3d(0, 0, 0); }
+}
+
+.work-card {
+  flex: 0 0 min(300px, 68vw);      /* deliberate peek = "this scrolls" */
+  aspect-ratio: 3 / 4;
+  margin: 0;
   position: relative;
   overflow: hidden;
-  border-radius: var(--r);
+  border-radius: var(--r-lg);
   background: var(--bg-card);
   border: 1px solid var(--line);
+  scroll-snap-align: start;
   isolation: isolate;
 }
-.gallery-tile img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  transition: transform 800ms var(--ease-out), filter 600ms var(--ease-out);
-  will-change: transform;
-}
-.gallery-tile:hover img { transform: scale(1.04); }
-.gallery-tile::after {
+.work-card.is-filtered { display: none; }
+.work-card img { width: 100%; height: 100%; object-fit: cover; }
+.work-card::after {
   content: '';
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, transparent 50%, rgba(7,9,15,0.75) 100%);
+  background: linear-gradient(180deg, transparent 55%, rgba(7,9,15,0.8) 100%);
   pointer-events: none;
 }
-.gallery-tile .tag {
-  position: absolute;
-  bottom: 0.9rem; left: 0.9rem;
-  z-index: 1;
+.work-card-tag {
+  position: absolute; bottom: 0.9rem; left: 0.9rem; z-index: 1;
   padding: 4px 9px;
   background: rgba(7,9,15,0.7);
   border: 1px solid var(--gold-line);
   color: var(--gold);
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
   border-radius: 999px;
-  backdrop-filter: blur(6px);
 }
-.gallery-tile.wide { grid-column: span 2; }
-.gallery-tile.tall { grid-row: span 2; }
 
-/* Horizontal "by occasion" row */
-.occasion-rail {
-  margin-top: 3rem;
-  padding-block: 2rem;
-  overflow: hidden;
+.rail-hint {
+  margin: 2.2rem 0 0.8rem;
+  text-align: center;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.filter-card {
+  flex: 0 0 min(190px, 46vw);
+  aspect-ratio: 4 / 5;
+  min-height: 44px;
   position: relative;
-}
-.occasion-track {
-  display: flex;
-  gap: 1.2rem;
-  padding-inline: 4vw;
-  will-change: transform;
-}
-.occasion-card {
-  flex: 0 0 min(360px, 70vw);
-  aspect-ratio: 3/4;
+  padding: 0;
+  overflow: hidden;
   border-radius: var(--r-lg);
-  overflow: hidden;
-  position: relative;
   background: var(--bg-card);
   border: 1px solid var(--line);
+  scroll-snap-align: start;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 200ms var(--ease-out), transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
 }
-.occasion-card img {
+.filter-card img {
+  position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
+  opacity: 0.62;
+  transition: opacity 300ms var(--ease-out);
 }
-.occasion-card-caption {
-  position: absolute;
-  inset: auto 0 0 0;
-  padding: 1.4rem 1.4rem 1.2rem;
-  background: linear-gradient(180deg, transparent 0%, rgba(7,9,15,0.92) 70%);
-  color: var(--text-primary);
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.05rem;
+.filter-card-meta {
+  position: absolute; inset: auto 0 0 0;
+  display: flex; align-items: baseline; gap: 0.5rem;
+  padding: 1.2rem 1rem 0.9rem;
+  background: linear-gradient(180deg, transparent 0%, rgba(7,9,15,0.94) 65%);
+}
+.filter-card-label { font-family: var(--font-display); font-weight: 700; font-size: 0.95rem; color: var(--text-primary); }
+.filter-card-count { margin-left: auto; font-size: 0.78rem; color: var(--text-muted); }
+.filter-card[aria-pressed="true"] {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold), 0 18px 40px -22px rgba(224,184,114,0.55);
+}
+.filter-card[aria-pressed="true"] img { opacity: 0.92; }
+.filter-card[aria-pressed="true"] .filter-card-label { color: var(--gold); }
+
+/* Desktop-only affordances: visible scrollbar, arrows, grab-drag. */
+.rail-nav { display: none; }
+@media (hover: hover) and (min-width: 1025px) {
+  .rail { scrollbar-width: thin; scrollbar-color: var(--gold-line) transparent; }
+  .rail::-webkit-scrollbar { display: block; height: 6px; }
+  .rail::-webkit-scrollbar-thumb { background: var(--gold-line); border-radius: 999px; }
+  .rail::-webkit-scrollbar-track { background: transparent; }
+  .work-rail { cursor: grab; }
+  .work-rail.is-grabbing { cursor: grabbing; user-select: none; }
+  .filter-card:hover { transform: translateY(-3px); border-color: var(--gold-line); }
+  .filter-card:hover img { opacity: 0.85; }
+
+  .rail-nav {
+    display: grid; place-items: center;
+    position: absolute; top: 50%; z-index: 3;
+    width: 46px; height: 46px;
+    transform: translateY(-50%);
+    border-radius: 50%;
+    background: rgba(7,9,15,0.82);
+    border: 1px solid var(--line-strong);
+    color: var(--text-primary);
+    transition: background 200ms var(--ease-out), opacity 200ms var(--ease-out);
+  }
+  .rail-nav:hover { background: rgba(224,184,114,0.18); border-color: var(--gold-line); }
+  .rail-nav[disabled] { opacity: 0.25; pointer-events: none; }
+  .rail-prev { left: 0.6rem; }
+  .rail-next { right: 0.6rem; }
+}
+
+/* Screen-reader-only live status */
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
 }
 
 /* -------- TESTIMONIALS -------- */
@@ -1314,30 +1316,16 @@ body.has-cursor .cursor-glow { opacity: 1; }
   .nav-links { display: none; }
   .burger { display: block; }
   .pkg-grid { grid-template-columns: repeat(2, 1fr); }
-  .gallery-grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 200px; }
-  .gallery-tile.wide { grid-column: span 2; }
-  .gallery-tile.tall { grid-row: span 1; }
   .tmt-grid { grid-template-columns: 1fr; }
   .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
   .contact-grid { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
 
-  /* Process: unpin and stack vertically (pin+scrub broken on iOS Safari with Lenis) */
-  .process-track-wrap { height: auto; display: block; }
-  .process-track { flex-direction: column; padding-inline: 0; gap: 1.4rem; transform: none !important; }
-  .process-card { flex: 1 1 auto; width: 100%; }
-
-  /* Occasion rail becomes horizontal native swipe */
-  .occasion-rail { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .occasion-track { transform: none !important; }
-
   /* No hover on touch → these promoted layers cost GPU memory for zero benefit.
      Let the browser promote on demand instead of pinning dozens of layers. */
-  .gallery-tile img,
   .showcase-photo img,
   .behind-tile img,
-  .featured-photo img,
-  .process-track { will-change: auto; }
+  .featured-photo img { will-change: auto; }
 }
 
 @media (max-width: 640px) {
@@ -1349,10 +1337,6 @@ body.has-cursor .cursor-glow { opacity: 1; }
   .nav-phone { display: none; }
   .trust-row { grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
   .trust-num { font-size: 1.8rem; }
-  .gallery-grid { grid-template-columns: 1fr; grid-auto-rows: 280px; }
-  .gallery-tile.wide { grid-column: auto; }
-  .process-card { grid-template-columns: 1fr; padding: 1.4rem; }
-  .process-img { aspect-ratio: 16/10; order: -1; }
   .footer-grid { grid-template-columns: 1fr; }
   .field-row { grid-template-columns: 1fr; }
   .cfg-result-head { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
@@ -2324,4 +2308,194 @@ body.has-cursor .cursor-glow { opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-video { display: none !important; }
+}
+
+/* =====================================================================
+   v7 — CONDITION SELF-ASSESSMENT ("How rough is it?")
+   A visitor INPUT control. Never labelled as a result of Gracie's work.
+   All motion is CSS off two custom properties; JS writes them once per
+   level change (max 4 writes across a full drag), never per frame.
+   ===================================================================== */
+
+/* Registered so they can be transitioned. Where @property is unsupported
+   the widget simply snaps between levels — still perfectly usable. */
+@property --wipe { syntax: '<number>'; inherits: true; initial-value: 0.5; }
+@property --dirt { syntax: '<number>'; inherits: true; initial-value: 0.5; }
+
+.condition {
+  background: linear-gradient(180deg, var(--bg-deep) 0%, #0a0c14 55%, var(--bg-deep) 100%);
+}
+
+.cond-panel {
+  --wipe: 0.5;
+  --dirt: 0.5;
+  --thumb: 34px;
+  /* A range thumb's centre travels from thumb/2 to width-thumb/2, so the
+     seam has to use the same geometry or it drifts ~17px at the ends. */
+  --wipe-x: calc(var(--wipe) * (100% - var(--thumb)) + var(--thumb) / 2);
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1.4rem, 3.5vw, 3rem);
+  align-items: center;
+  max-width: 1020px;
+  margin: var(--gap-inner) auto 0;
+  padding: clamp(1.2rem, 3vw, 2.2rem);
+  background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-elev) 100%);
+  border: 1px solid var(--gold-line);
+  border-radius: var(--r-lg);
+  transition: --wipe 260ms var(--ease-out), --dirt 260ms var(--ease-out);
+}
+/* While a finger/mouse is down: track instantly, no rubber-banding. */
+.cond-panel.is-dragging { transition: none; }
+
+.cond-visual { min-width: 0; }
+.cond-stage {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 3 / 4;          /* matches the exported photo pair exactly */
+  border-radius: var(--r);
+  overflow: hidden;
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+}
+.cond-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+/* The grade — static per level, so at most 4 re-rasters across a drag. */
+.cond-img-dirty {
+  z-index: 1;
+  filter:
+    saturate(calc(1 - var(--dirt) * 0.30))
+    contrast(calc(1 + var(--dirt) * 0.10))
+    brightness(calc(1 - var(--dirt) * 0.12))
+    sepia(calc(var(--dirt) * 0.16));
+}
+/* The two reference photos are different vehicles shot at different distances,
+   so a hard wipe seam would read as a broken join. Cross-fade instead: the
+   clean photo fades out as the handle moves right and the graded dirty photo
+   takes over. Opacity only — pure compositing, no per-frame raster. */
+/* Steep on purpose: the two "clean" levels sit fully on the clean photo and
+   the three "rough" levels fully on the dirty one, so you're always looking at
+   a real photo rather than a ghosted blend of both. The 260ms transition makes
+   the hand-off smooth, and the grading ramp differentiates within each half. */
+.cond-img-clean { z-index: 2; opacity: clamp(0, calc(2 - var(--wipe) * 4), 1); }
+
+/* Dust/haze wash over the dirty photo, opacity driven by the grading ramp. */
+.cond-grade {
+  position: absolute; inset: 0; z-index: 3;
+  pointer-events: none;
+  opacity: calc(var(--dirt) * 0.42);
+  background:
+    radial-gradient(130% 100% at 50% 12%, rgba(120,102,72,0) 32%, rgba(58,48,34,0.8) 100%),
+    linear-gradient(180deg, rgba(122,104,74,0.24) 0%, rgba(60,50,36,0.5) 100%);
+}
+
+.cond-label {
+  display: block;
+  margin: 1.1rem 0 0.2rem;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+.cond-range {
+  -webkit-appearance: none; appearance: none;
+  display: block;
+  width: 100%;
+  height: 44px;                 /* full 44px touch target */
+  margin: 0;
+  background: transparent;
+  touch-action: pan-y;          /* vertical page scroll still passes through */
+  cursor: ew-resize;
+}
+.cond-range::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--gold-deep) 0%, var(--gold) var(--wipe-x), rgba(255,255,255,0.10) var(--wipe-x));
+}
+.cond-range::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: var(--thumb); height: var(--thumb);
+  margin-top: -13px;            /* centre the 34px thumb on the 8px track */
+  border-radius: 50%;
+  border: 2px solid #1A1208;
+  background: linear-gradient(135deg, var(--gold-warm), var(--gold) 60%, var(--gold-deep));
+  box-shadow: 0 6px 18px -6px rgba(0,0,0,0.85), 0 0 0 6px rgba(224,184,114,0.14);
+}
+.cond-range::-moz-range-track    { height: 8px; border-radius: 999px; background: rgba(255,255,255,0.10); }
+.cond-range::-moz-range-progress { height: 8px; border-radius: 999px; background: linear-gradient(90deg, var(--gold-deep), var(--gold)); }
+.cond-range::-moz-range-thumb {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 2px solid #1A1208; background: var(--gold);
+}
+.cond-range:focus-visible { outline: none; }
+.cond-range:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--gold); outline-offset: 3px; }
+.cond-range:focus-visible::-moz-range-thumb     { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+.cond-ends {
+  display: flex; justify-content: space-between; gap: 1rem;
+  margin-top: 0.4rem;
+  font-size: 0.75rem; color: var(--text-muted);
+}
+.cond-photo-note {
+  margin-top: 0.9rem;
+  font-size: 0.76rem; line-height: 1.5;
+  color: var(--text-faint);
+}
+
+.cond-readout { display: flex; flex-direction: column; gap: 0.7rem; min-width: 0; }
+.cond-level {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  line-height: 1.05; letter-spacing: -0.02em;
+  color: var(--gold);
+}
+.cond-blurb { color: var(--text-body); font-size: 0.98rem; line-height: 1.6; }
+.cond-suggest {
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: 0.5rem;
+  padding: 0.9rem 1.1rem;
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-line);
+  border-radius: var(--r);
+}
+.cond-suggest-label { font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+.cond-suggest-tier  { font-family: var(--font-display); font-weight: 700; color: var(--text-primary); }
+.cond-suggest-price { margin-left: auto; font-family: var(--font-display); font-weight: 800; color: var(--gold); font-size: 1.2rem; }
+.cond-suggest-price small { font-size: 0.68rem; color: var(--text-muted); font-weight: 500; margin-left: 0.35rem; }
+.cond-ctas { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 0.3rem; }
+.cond-foot { font-size: 0.8rem; color: var(--text-muted); }
+
+/* Condition chip inside the contact form */
+.form-condition {
+  display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap;
+  margin: 0 0 0.9rem;
+  padding: 0.7rem 0.9rem;
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-line);
+  border-radius: var(--r-sm);
+  font-size: 0.86rem; color: var(--text-body);
+}
+.form-condition[hidden] { display: none; }
+.form-condition strong { color: var(--text-primary); }
+.form-condition-clear {
+  margin-left: auto;
+  min-height: 44px; padding: 0 0.6rem;
+  font-size: 0.8rem; color: var(--text-muted);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@media (hover: hover) and (min-width: 1025px) {
+  .cond-stage { cursor: ew-resize; }
+}
+@media (max-width: 900px) {
+  .cond-panel { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .cond-ctas .btn { width: 100%; justify-content: center; }
+  .cond-ends span { max-width: 45%; }
 }

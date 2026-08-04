@@ -9,6 +9,10 @@ const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const NO_HOVER = matchMedia('(hover: none)').matches;
 document.documentElement.classList.add('has-js');
 
+// Set by the condition slider, read by the contact form. Stays null until the
+// visitor actually moves it — a default we picked for them isn't their answer.
+let conditionPick = null;
+
 // ============================================================
 // 0. CONTENT RENDER — populate everything from content.js
 // ============================================================
@@ -272,45 +276,124 @@ function renderCustomBuilder() {
   });
 }
 
-function renderProcess() {
-  $('#processTrack').innerHTML = content.process.map(s => `
-    <article class="process-card" data-reveal>
-      <div class="process-card-text">
-        <div class="process-step">${s.step}</div>
-        <h3 class="process-title">${s.title}</h3>
-        <p class="process-body">${s.body}</p>
-      </div>
-      <div class="process-img">
-        <img src="${s.image}" alt="${s.title}" loading="lazy" onerror="this.style.display='none'">
-      </div>
-    </article>
-  `).join('');
-}
-
+// Rail 1 = every work photo. Rail 2 = category cards that filter Rail 1.
+// Filtering toggles a class rather than re-rendering: reveal animations are
+// wired once at boot, so re-injected nodes would never animate, and a class
+// toggle is far cheaper than re-decoding 30 images on every tap.
 function renderGallery() {
-  const cells = content.gallery;
-  // Decorate every 5th tile as 'wide' and every 7th as 'tall' for organic masonry
-  $('#galleryGrid').innerHTML = cells.map((g, i) => {
-    const cls = i % 5 === 2 ? 'wide' : (i % 7 === 4 ? 'tall' : '');
+  const track  = $('#workTrack');
+  const rail   = $('#workRail');
+  const fTrack = $('#filterTrack');
+  if (!track || !rail || !fTrack) return;
+
+  const hint = $('#railHint');
+  if (hint) hint.textContent = (content.gallerySection || {}).filterHint || '';
+
+  track.innerHTML = content.gallery.map((g, i) => {
     const cat = content.galleryCategories.find(c => c.id === g.category);
     return `
-      <figure class="gallery-tile ${cls}" data-reveal>
-        <img src="${g.src}" alt="${g.alt}" loading="lazy" onerror="this.parentElement.style.background='var(--bg-elev)';this.remove()">
-        ${cat ? `<figcaption class="tag">${cat.label}</figcaption>` : ''}
-      </figure>
-    `;
+      <figure class="work-card" data-cat="${g.category}">
+        <img src="${g.src}" alt="${g.alt}" loading="${i < 3 ? 'eager' : 'lazy'}" decoding="async"
+             onerror="this.parentElement.style.background='var(--bg-elev)';this.remove()">
+        ${cat ? `<figcaption class="work-card-tag">${cat.label}</figcaption>` : ''}
+      </figure>`;
   }).join('');
 
-  // Occasion rail — one card per category, lead photo from gallery
-  $('#occasionTrack').innerHTML = content.galleryCategories.map(c => {
-    const lead = content.gallery.find(g => g.category === c.id);
+  // Only render a filter card for a category that actually has photos —
+  // we never advertise a type of work we can't show.
+  const counts = content.gallery.reduce((m, g) => (m[g.category] = (m[g.category] || 0) + 1, m), {});
+  const cats = content.galleryCategories.filter(c => c.id === 'all' || counts[c.id] > 0);
+
+  fTrack.innerHTML = cats.map((c, i) => {
+    const lead = c.lead || (content.gallery.find(g => g.category === c.id) || {}).src;
+    const n = c.id === 'all' ? content.gallery.length : counts[c.id];
     return `
-      <div class="occasion-card">
-        ${lead ? `<img src="${lead.src}" alt="${c.label}" loading="lazy" onerror="this.parentElement.style.background='var(--bg-elev)';this.remove()">` : ''}
-        <div class="occasion-card-caption">${c.label}</div>
-      </div>
-    `;
+      <button type="button" class="filter-card${i === 0 ? ' is-selected' : ''}"
+              data-filter="${c.id}" aria-pressed="${i === 0}">
+        ${lead ? `<img src="${lead}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : ''}
+        <span class="filter-card-meta">
+          <span class="filter-card-label">${c.label}</span>
+          <span class="filter-card-count">${n}</span>
+        </span>
+      </button>`;
   }).join('');
+
+  const cards  = $$('.work-card', track);
+  const btns   = $$('.filter-card', fTrack);
+  const status = $('#workStatus');
+  let active = 'all';
+
+  function applyFilter(id) {
+    if (id === active) return;
+    active = id;
+    const cat = content.galleryCategories.find(c => c.id === id);
+
+    let shown = 0;
+    cards.forEach(card => {
+      const on = id === 'all' || card.dataset.cat === id;
+      card.classList.toggle('is-filtered', !on);
+      if (on) shown++;
+    });
+    btns.forEach(b => {
+      const on = b.dataset.filter === id;
+      b.classList.toggle('is-selected', on);
+      b.setAttribute('aria-pressed', String(on));
+    });
+
+    // Filtering changes scrollWidth — put the visitor back at the start.
+    rail.scrollTo({ left: 0, behavior: REDUCED ? 'auto' : 'smooth' });
+
+    if (status) {
+      status.textContent = `Showing ${shown} of ${content.gallery.length} photos` +
+        (id === 'all' ? '.' : ` — ${cat ? cat.label : id}.`);
+    }
+    // One composited animation on the track, never one per card.
+    if (!REDUCED) {
+      track.classList.remove('is-swapping');
+      void track.offsetWidth;
+      track.classList.add('is-swapping');
+    }
+  }
+
+  fTrack.addEventListener('click', e => {
+    const btn = e.target.closest('[data-filter]');
+    if (btn) applyFilter(btn.dataset.filter);
+  });
+
+  // Desktop-only arrows + click-drag. Touch uses native momentum scrolling.
+  if (!NO_HOVER) {
+    const prev = $('#workPrev'), next = $('#workNext');
+    if (prev && next) {
+      const step = () => Math.max(240, rail.clientWidth * 0.8);
+      const syncNav = () => {
+        const max = rail.scrollWidth - rail.clientWidth - 2;
+        prev.disabled = rail.scrollLeft <= 2;
+        next.disabled = rail.scrollLeft >= max;
+      };
+      prev.addEventListener('click', () => rail.scrollBy({ left: -step(), behavior: 'smooth' }));
+      next.addEventListener('click', () => rail.scrollBy({ left:  step(), behavior: 'smooth' }));
+      let navT;
+      rail.addEventListener('scroll', () => {
+        if (navT) return;
+        navT = requestAnimationFrame(() => { navT = null; syncNav(); });
+      }, { passive: true });
+      syncNav();
+    }
+
+    let down = false, startX = 0, startLeft = 0;
+    rail.addEventListener('pointerdown', e => {
+      if (e.pointerType !== 'mouse') return;
+      down = true; startX = e.clientX; startLeft = rail.scrollLeft;
+      rail.classList.add('is-grabbing');
+    });
+    rail.addEventListener('pointermove', e => {
+      if (!down) return;
+      e.preventDefault();
+      rail.scrollLeft = startLeft - (e.clientX - startX);
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev =>
+      rail.addEventListener(ev, () => { down = false; rail.classList.remove('is-grabbing'); }));
+  }
 }
 
 function renderTestimonials() {
@@ -444,6 +527,124 @@ function renderFaq() {
   `).join('');
 }
 
+// "How rough is it?" — a visitor self-assessment control, NOT a before/after
+// of Gracie's work. Two real photos of the same angle act as a reference scale.
+// All motion is CSS driven off two custom properties; JS writes them once per
+// level change (max 4 writes across a full drag), never per frame.
+function renderCondition() {
+  const c = content.condition;
+  const mount = $('#condMount');
+  if (!mount || !c || !c.enabled) return;
+
+  const levels = c.levels;
+  const last = levels.length - 1;
+  const START = Math.min(c.defaultIndex == null ? Math.floor(levels.length / 2) : c.defaultIndex, last);
+  const pkgOf = i => content.packages.find(p => p.id === levels[i].packageId);
+
+  mount.innerHTML = `
+    <div class="section-head">
+      <p class="eyebrow"><span class="dot"></span> ${c.eyebrow}</p>
+      <h2 class="split">${c.title}</h2>
+      <p>${c.intro}</p>
+    </div>
+    <div class="cond-panel" id="condPanel" data-reveal>
+      <div class="cond-visual">
+        <figure class="cond-stage" id="condStage">
+          <img class="cond-img cond-img-dirty" src="${c.photoDirty.src}" alt="${c.photoDirty.alt}" loading="lazy" decoding="async">
+          <img class="cond-img cond-img-clean" src="${c.photoClean.src}" alt="${c.photoClean.alt}" loading="lazy" decoding="async">
+          <span class="cond-grade" aria-hidden="true"></span>
+        </figure>
+        <label class="cond-label" for="condRange">${c.sliderLabel}</label>
+        <input class="cond-range" id="condRange" type="range" min="0" max="${last}" step="1"
+               value="${START}" aria-valuetext="${levels[START].label}">
+        <div class="cond-ends" aria-hidden="true">
+          <span>${levels[0].label}</span><span>${levels[last].label}</span>
+        </div>
+        <p class="cond-photo-note">${c.photoNote}</p>
+      </div>
+      <div class="cond-readout">
+        <div class="cond-level" id="condLevel"></div>
+        <p class="cond-blurb" id="condBlurb"></p>
+        <div class="cond-suggest" id="condSuggest"></div>
+        <div class="cond-ctas">
+          <a class="btn btn-primary" id="condSms" href="${content.booking.smsHref}">${c.ctaLabel} <span class="arrow">→</span></a>
+          <a class="btn btn-ghost" href="#contact">${c.secondaryCtaLabel}</a>
+        </div>
+        <p class="cond-foot">${c.disclaimer}</p>
+      </div>
+    </div>
+  `;
+
+  const panel = $('#condPanel');
+  const stage = $('#condStage');
+  const range = $('#condRange');
+  const smsEl = $('#condSms');
+  let touched = false;
+
+  function sync(i) {
+    const l = levels[i], p = pkgOf(i);
+    panel.style.setProperty('--wipe', i / last);  // linear — seam tracks the handle
+    panel.style.setProperty('--dirt', l.dirt);    // non-linear — bad end reads dirtier
+    $('#condLevel').textContent = l.label;
+    $('#condBlurb').textContent = l.blurb;
+    $('#condSuggest').innerHTML = `
+      <span class="cond-suggest-label">Probably</span>
+      <span class="cond-suggest-tier">${p.tier}</span>
+      <span class="cond-suggest-price">${currencyAU(p.priceFrom)}<small>from</small></span>`;
+    smsEl.href = `${content.booking.smsHref}?&body=${encodeURIComponent(
+      `Hi Gracie! ${c.smsIntro}: ${l.label} (${i + 1}/${levels.length}). ` +
+      `Looks like ${p.tier} (${currencyAU(p.priceFrom)} from). My name: , Suburb: , Vehicle: `
+    )}`;
+    range.setAttribute('aria-valuetext', `${l.label} — ${p.tier}`);
+    conditionPick = touched ? { label: l.label, tier: p.tier } : null;
+    syncConditionChip();
+  }
+
+  range.addEventListener('input', () => { touched = true; sync(+range.value); });
+
+  // Track the finger instantly while dragging; ease only for keyboard/taps.
+  const dragOn  = () => panel.classList.add('is-dragging');
+  const dragOff = () => panel.classList.remove('is-dragging');
+  ['pointerdown', 'touchstart'].forEach(ev => range.addEventListener(ev, dragOn, { passive: true }));
+  ['pointerup', 'pointercancel', 'touchend', 'blur'].forEach(ev => range.addEventListener(ev, dragOff, { passive: true }));
+
+  // Drag straight on the photo — DESKTOP ONLY. On touch this would need
+  // touch-action:none, which would swallow vertical page scroll.
+  if (!NO_HOVER) {
+    let dragging = false;
+    const setFromX = e => {
+      const r = stage.getBoundingClientRect();
+      const i = Math.round(Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * last);
+      if (i !== +range.value) { range.value = i; touched = true; sync(i); }
+    };
+    stage.addEventListener('pointerdown', e => {
+      dragging = true; dragOn(); stage.setPointerCapture(e.pointerId); setFromX(e);
+    });
+    stage.addEventListener('pointermove', e => { if (dragging) setFromX(e); });
+    ['pointerup', 'pointercancel'].forEach(ev => stage.addEventListener(ev, e => {
+      dragging = false; dragOff();
+      if (stage.hasPointerCapture(e.pointerId)) stage.releasePointerCapture(e.pointerId);
+    }));
+  }
+
+  sync(START);   // touched === false, so conditionPick stays null
+}
+
+// Mirrors the chosen condition into the contact form so the visitor can see
+// it will travel with their enquiry.
+function syncConditionChip() {
+  const chip = $('#formCondition');
+  if (!chip) return;
+  if (!conditionPick) { chip.hidden = true; chip.innerHTML = ''; return; }
+  chip.hidden = false;
+  chip.innerHTML = `
+    <span>Condition you picked: <strong>${conditionPick.label}</strong> · suggested ${conditionPick.tier}</span>
+    <button type="button" class="form-condition-clear" id="formConditionClear">Clear</button>`;
+}
+document.addEventListener('click', e => {
+  if (e.target.closest('#formConditionClear')) { conditionPick = null; syncConditionChip(); }
+});
+
 function renderContact() {
   const b = content.booking;
   const textHref = `${b.smsHref}?&body=${encodeURIComponent("Hi Gracie! I'd like to book a detail. My name: , Suburb: , Vehicle: ")}`;
@@ -558,7 +759,6 @@ renderTrust();
 renderMaintenance();
 renderPackages();
 renderCustomBuilder();
-renderProcess();
 renderWhyGracie();
 renderFeaturedWork();
 renderGallery();
@@ -569,6 +769,7 @@ renderTestimonials();
 renderAbout();
 renderSuburbs();
 renderFaq();
+renderCondition();
 renderContact();
 renderFooter();
 renderNav();
@@ -803,18 +1004,6 @@ if (window.ScrollTrigger && !REDUCED) {
       scrub: 0.6
     }
   });
-
-  // Gallery tile float — desktop only. One scrub trigger PER image is costly on
-  // mobile (each repositions a layer every scroll frame) and adds to scroll jank.
-  if (!NO_HOVER) {
-    $$('.gallery-tile img').forEach(img => {
-      gsap.fromTo(img, { y: -8 }, {
-        y: 8,
-        ease: 'none',
-        scrollTrigger: { trigger: img, start: 'top bottom', end: 'bottom top', scrub: 1.5 }
-      });
-    });
-  }
 }
 
 // ============================================================
@@ -835,38 +1024,6 @@ if (window.ScrollTrigger && !REDUCED) {
     });
   });
 }
-
-// ============================================================
-// 10. PROCESS — HORIZONTAL PINNED (desktop ≥1025)
-// ============================================================
-function initProcessTimeline() {
-  // Desktop hover devices only — pin+scrub is unreliable/janky on touch (incl. tablets ≥1025).
-  if (window.innerWidth < 1025 || NO_HOVER || REDUCED || !window.ScrollTrigger) return;
-  const track = $('#processTrack');
-  const wrap = $('#processTrackWrap');
-  if (!track || !wrap) return;
-
-  // Compute total travel
-  const trackW = track.scrollWidth;
-  const wrapW = wrap.offsetWidth;
-  const distance = trackW - wrapW + 80;
-  if (distance <= 0) return;
-
-  gsap.to(track, {
-    x: -distance,
-    ease: 'none',
-    scrollTrigger: {
-      trigger: wrap,
-      start: 'top top',
-      end: () => `+=${distance + window.innerHeight * 0.4}`,
-      pin: true,
-      scrub: 0.6,
-      anticipatePin: 1,
-      invalidateOnRefresh: true
-    }
-  });
-}
-initProcessTimeline();
 
 // ============================================================
 // 11. WEBGL HERO SHADER — dust + light leak (hand-rolled)
@@ -999,9 +1156,11 @@ function initHeroShader() {
 $('#contactForm').addEventListener('submit', e => {
   e.preventDefault();
   const data = new FormData(e.target);
+  const cond = conditionPick ? `Condition: ${conditionPick.label} (suggested ${conditionPick.tier}). ` : '';
   const body = encodeURIComponent(
     `Hi Gracie! New enquiry from ${data.get('name') || 'the site'}. ` +
     `Phone: ${data.get('phone') || '-'}. Vehicle: ${data.get('vehicle') || '-'}. ` +
+    cond +
     `${data.get('message') || ''}`
   );
   window.location.href = `${content.booking.smsHref}?&body=${body}`;
@@ -1020,7 +1179,7 @@ runOverture().then(() => {
   if (window.ScrollTrigger) ScrollTrigger.refresh();
 });
 
-// Re-init process timeline on resize (cross-breakpoint)
+// Recompute ScrollTrigger positions after a resize (cross-breakpoint)
 let resizeT;
 window.addEventListener('resize', () => {
   clearTimeout(resizeT);

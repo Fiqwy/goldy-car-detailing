@@ -81,11 +81,11 @@
   <div class="drawer" id="drawer" aria-hidden="true" inert>
     <a href="#configurator">Get a price</a>
     <a href="#packages">Packages</a>
-    <a href="#process">Process</a>
     <a href="#gallery">Work</a>
     <a href="#bikes">Bikes</a>
     <a href="#caravans">Caravans &amp; vans</a>
     <a href="#about">About Gracie</a>
+    <a href="#condition">How rough is it?</a>
     <a href="#contact">Contact</a>
     <a href="#" id="drawerPhone" class="btn btn-primary">Call Gracie</a>
   </div>
@@ -225,22 +225,6 @@
     <div class="divider" data-reveal></div>
 
     <!-- ============================================================
-         PROCESS — horizontal pinned timeline (desktop) / stacked (mobile)
-         ============================================================ -->
-    <section class="process" id="process">
-      <div class="container">
-        <div class="section-head">
-          <p class="eyebrow"><span class="dot"></span> Your paint's journey</p>
-          <h2 class="split">Every detail follows the same five steps.</h2>
-          <p>Nothing skipped, nothing improvised. Slow when it counts, sharp when it doesn't.</p>
-        </div>
-      </div>
-      <div class="process-track-wrap" id="processTrackWrap">
-        <div class="process-track" id="processTrack"></div>
-      </div>
-    </section>
-
-    <!-- ============================================================
          FEATURED TRANSFORMATION — real Goldy job + verbatim IG caption
          (Replaces the previous CSS-filter slider — real before/after pair
           returns here once Gracie supplies one from her phone library.)
@@ -268,7 +252,10 @@
     <div class="divider" data-reveal></div>
 
     <!-- ============================================================
-         GALLERY — masonry + horizontal "by occasion" rail
+         GALLERY — Rail 1 (every photo) + Rail 2 (category cards that
+         filter Rail 1). Both scroll natively at EVERY breakpoint; the old
+         rail was overflow:hidden on desktop so its tail was unreachable.
+         data-lenis-prevent-wheel keeps Lenis off horizontal trackpad scroll.
          ============================================================ -->
     <section class="gallery" id="gallery">
       <div class="container">
@@ -277,11 +264,25 @@
           <h2 class="split">Real cars. Real driveways. Real finish.</h2>
           <p>Every photo here is Gracie's own work, on the Gold Coast.</p>
         </div>
-        <div class="gallery-grid" id="galleryGrid"></div>
 
-        <div class="occasion-rail" aria-label="By occasion">
-          <div class="occasion-track" id="occasionTrack"></div>
+        <div class="rail-wrap" data-reveal>
+          <div class="rail work-rail" id="workRail" role="region"
+               aria-label="All recent work — scroll sideways" tabindex="0" data-lenis-prevent-wheel>
+            <div class="rail-track work-track" id="workTrack"></div>
+          </div>
+          <button type="button" class="rail-nav rail-prev" id="workPrev" aria-label="Scroll work photos left">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <button type="button" class="rail-nav rail-next" id="workNext" aria-label="Scroll work photos right">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
         </div>
+
+        <p class="rail-hint" id="railHint"></p>
+        <div class="rail filter-rail" id="filterRail" data-lenis-prevent-wheel data-reveal>
+          <div class="rail-track filter-track" id="filterTrack" role="group" aria-label="Filter work by type"></div>
+        </div>
+        <p class="sr-only" id="workStatus" role="status" aria-live="polite"></p>
       </div>
     </section>
     <div class="divider" data-reveal></div>
@@ -410,6 +411,18 @@
         </div>
       </div>
     </section>
+    <div class="divider" data-reveal></div>
+
+    <!-- ============================================================
+         CONDITION SELF-ASSESSMENT — "How rough is it?"
+         A visitor INPUT widget, never a claim about Gracie's work.
+         Everything inside is rendered by renderCondition().
+         ============================================================ -->
+    <section class="condition" id="condition">
+      <div class="container">
+        <div id="condMount"></div>
+      </div>
+    </section>
 
     <!-- ============================================================
          CONTACT
@@ -443,6 +456,7 @@
               <label for="cMsg">Anything we should know?</label>
               <textarea id="cMsg" name="message" placeholder="Suburb, condition, what you're after..."></textarea>
             </div>
+            <p class="form-condition" id="formCondition" hidden></p>
             <div class="form-submit">
               <button type="submit" class="btn btn-primary">Text Gracie <span class="arrow">→</span></button>
             </div>
@@ -468,7 +482,6 @@
           <ul>
             <li><a href="#configurator">Get a price</a></li>
             <li><a href="#packages">Packages</a></li>
-            <li><a href="#process">Process</a></li>
             <li><a href="#gallery">Work</a></li>
             <li><a href="#about">About</a></li>
           </ul>

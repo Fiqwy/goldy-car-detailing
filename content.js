@@ -202,7 +202,6 @@ export const content = Object.freeze({
   addOns: [
     { id: "petHair",     name: "Pet hair removal",            price: 45,  note: "Per vehicle" },
     { id: "leather",     name: "Deep leather conditioning",   price: 65,  note: "Adds ~30 min" },
-    { id: "headlights",  name: "Headlight restoration",       price: 95,  note: "Pair, restores clarity" },
     { id: "engineBay",   name: "Engine bay detail",           price: 75,  note: "Plastics dressed, no risk" }
   ],
 
@@ -215,7 +214,6 @@ export const content = Object.freeze({
     { id: "tyreseal",   group: "Exterior", name: "Tyre shine + spray sealant top-up",       price: 25, base: true },  // in Tidy up base
     { id: "decon",      group: "Exterior", name: "Full exterior decontamination",           price: 85 },  // CONFIRM
     { id: "cutpolish",  group: "Exterior", name: "Cut & polish",                            price: 190 }, // CONFIRM
-    { id: "headlights", group: "Exterior", name: "Headlight restoration",                   price: 95 },  // ✓ real add-on
     { id: "vacuum",     group: "Interior", name: "Interior vacuum + plastics wipe-down",    price: 45, base: true },  // in Tidy up base
     { id: "windows",    group: "Interior", name: "Windows inside and out",                  price: 25, base: true },  // in Tidy up base
     { id: "shampoo",    group: "Interior", name: "Full interior shampoo",                   price: 120 }, // CONFIRM
@@ -226,41 +224,45 @@ export const content = Object.freeze({
     { id: "photos",     group: "Extras",   name: "Sale photography (Canon 1500D)",          price: 45 }   // CONFIRM
   ],
 
-  // 5-step process — the journey, with real photos
-  process: [
-    {
-      step: "01",
-      title: "Inspection + plan",
-      body: "Every detail starts with the paint. Gauge, inspection light, walk-around. Every car gets a different plan, never a template.",
-      image: "assets/process/01-assessment.jpg"
+  // ============================================================
+  // CONDITION SELF-ASSESSMENT — "How rough is it?"
+  // This is a VISITOR INPUT control, not a before/after of Gracie's work.
+  // Two real photos of a Prado interior (same angle, one clean, one dusty)
+  // act as a reference scale so the customer can show her what she's walking
+  // into before she quotes. `dirt` is grading intensity only (0–1) and ramps
+  // non-linearly so the bad end reads dirtier; the wipe itself stays linear
+  // so the seam always tracks the handle.
+  // ============================================================
+  condition: {
+    enabled: true,
+    eyebrow: "Before you send it",
+    title: "How rough is it, honestly?",
+    intro: "Drag it to whatever's closest to your car right now. Gracie would rather know up front — it means the price and the time she blocks out are right the first go.",
+    sliderLabel: "Drag to show how dirty yours is",
+    defaultIndex: 2,
+    photoClean: {
+      src: "assets/condition/clean.jpg",
+      alt: "Prado interior from the open tailgate — vacuumed, nothing on the floor"
     },
-    {
-      step: "02",
-      title: "Decontamination",
-      body: "Snow foam pre-wash, two-bucket wash, iron remover, tar remover, then a clay treatment until the paint is glass-smooth to the touch.",
-      image: "assets/process/02-decon.jpg"
+    photoDirty: {
+      src: "assets/condition/dirty.jpg",
+      alt: "The same angle on a Prado interior — dusty, sandy, lived in"
     },
-    {
-      step: "03",
-      title: "Correction",
-      body: "Single or two-stage machine polish, refining the finish until light bounces clean off the panel. No haze, no swirls, no shortcuts.",
-      image: "assets/process/03-correction.jpg"
-    },
-    {
-      step: "04",
-      title: "Protection",
-      body: "A spray sealant laid over paint, glass and wheels. Water beads off, dirt struggles to grip, and the shine holds for weeks instead of days.",
-      image: "assets/process/04-protection.jpg"
-    },
-    {
-      step: "05",
-      title: "Final inspection + handover",
-      body: "Inspected under bright light from every angle. Show-ready includes sale photography for your listing. Then I'm out of your driveway.",
-      image: "assets/process/05-handover.jpg"
-    }
-  ],
+    photoNote: "A reference scale for your car, not a before-and-after of a job. The rough end is styled darker so it reads as worst case.",
+    disclaimer: "This isn't a quote. It just tells Gracie what she's walking into.",
+    ctaLabel: "Text Gracie this",
+    secondaryCtaLabel: "Or use the form",
+    smsIntro: "Condition check from the site",
+    levels: [
+      { id: "clean", label: "Pretty clean",    blurb: "Washed recently, nothing on the floor. You just want it sharp again.",            packageId: "silver",  dirt: 0.00 },
+      { id: "dusty", label: "A bit dusty",     blurb: "Beach sand in the mats, dust on the dash, a couple of coffee rings. Normal life.", packageId: "silver",  dirt: 0.22 },
+      { id: "lived", label: "Lived in",        blurb: "Kids, dogs, work gear. Marks in the trim and the carpet needs more than a vacuum.", packageId: "gold",    dirt: 0.50 },
+      { id: "rough", label: "Genuinely rough", blurb: "Months of neglect. Stains, hair, grime in every seam. It needs a full reset.",     packageId: "gold",    dirt: 0.78 },
+      { id: "feral", label: "Don't judge me",  blurb: "You've been avoiding looking at it. Gracie's seen worse — bring it on.",           packageId: "diamond", dirt: 1.00 }
+    ]
+  },
 
-  // 22 photos, all real, all from her IG portfolio (1440×1920 high-res)
+  // Every photo Rail 1 shows. `category` drives the Rail 2 filter cards.
   gallery: [
     // ---- DAILY DRIVERS (5) ----
     { src: "assets/gallery/01-bmw-x3.jpg",                alt: "BMW X3 — full detail, showroom finish",                            category: "daily"  },
@@ -295,16 +297,51 @@ export const content = Object.freeze({
     { src: "assets/gallery/19-hiace-van.jpg",             alt: "Toyota Hiace Van — detail refresher",               category: "vans"    },
     { src: "assets/gallery/20-hiace-wheel-detail.jpg",    alt: "Hiace wheel + bodywork detail — bronze rim, white panel",   category: "vans"    },
     { src: "assets/gallery/21-dog-van.jpg",               alt: "Dog-grooming work van — de-dog-hairing + deep interior",    category: "vans"    },
-    { src: "assets/gallery/22-work-ute.jpg",              alt: "Work ute — even work utes deserve some love",               category: "vans"    }
+    { src: "assets/gallery/22-work-ute.jpg",              alt: "Work ute — even work utes deserve some love",               category: "vans"    },
+
+    // ---- BIKES (2 more, client-supplied 2026-06-30) ----
+    { src: "assets/bikes/04-harley-road-glide-black.jpg", alt: "Harley-Davidson Road Glide — blacked out, tank and fairing detailed", category: "bikes" },
+    { src: "assets/bikes/05-harley-custom-turbo.jpg",     alt: "Custom turbocharged Harley — candy paint and polished spokes",       category: "bikes" },
+
+    // ---- HORSEFLOATS (4) ----
+    { src: "assets/vans-rvs/06-ram-horsefloat.jpg",       alt: "Ram pulled up to a white horsefloat — country property",             category: "horsefloats" },
+    { src: "assets/vans-rvs/07-horsefloat-longreach.jpg", alt: "Longreach horsefloat — washed and cut back under the carport",       category: "horsefloats" },
+    { src: "assets/vans-rvs/08-horsefloat-interior.jpg",  alt: "Horsefloat interior — stalls, padding and matting cleaned out",      category: "horsefloats" },
+    { src: "assets/vans-rvs/09-horsefloat-karakar.jpg",   alt: "Kara Kar horsefloat — polished alloy and paint, ready to travel",    category: "horsefloats" },
+
+    // ---- CARAVANS & MOTORHOMES (1) ----
+    { src: "assets/vans-rvs/10-motorhome-alpine.jpg",     alt: "Alpine motorhome — full exterior wash and cut on the driveway",      category: "caravans" },
+
+    // ---- GOVERNMENT & EMERGENCY (3) ----
+    { src: "assets/gov/01-rfs-patrol-yellow.jpg",         alt: "Rural Fire Service Nissan Patrol — fleet vehicle detailed",          category: "govt" },
+    { src: "assets/gov/02-rfs-landcruiser-side.jpg",      alt: "Rural Fire Service Land Cruiser — livery cleaned and protected",     category: "govt" },
+    { src: "assets/gov/03-rfs-landcruiser-front.jpg",     alt: "Rural Fire Service Land Cruiser — front on, washed and dressed",     category: "govt" },
+
+    // ---- FARM & MACHINERY (2) ----
+    { src: "assets/farm/01-bobcat-s160.jpg",              alt: "Bobcat S160 skid steer — cleaned up on the property",                category: "farm" },
+    { src: "assets/farm/02-polaris-kubota.jpg",           alt: "Polaris Ranger and Kubota RTV — farm side-by-sides detailed",        category: "farm" }
   ],
 
+  // Rail 2 = these cards, and they filter Rail 1. The lead photo for each card
+  // is derived from `gallery` (first match), so the rail's data source stays
+  // the gallery array. "All work" has no photos of its own, so it names a lead.
+  // Categories with zero photos are never rendered — no empty filters.
   galleryCategories: [
-    { id: "daily",   label: "Daily drivers" },
-    { id: "special", label: "Special builds" },
-    { id: "resale",  label: "Sale-ready" },
-    { id: "bikes",   label: "Bikes" },
-    { id: "vans",    label: "Vans & trades" }
+    { id: "all",         label: "All work",              lead: "assets/gallery/24-hsv-clubsport-side.jpg" },
+    { id: "daily",       label: "Daily drivers" },
+    { id: "special",     label: "Special builds" },
+    { id: "resale",      label: "Sale-ready" },
+    { id: "bikes",       label: "Bikes" },
+    { id: "vans",        label: "Vans & trades" },
+    { id: "horsefloats", label: "Horsefloats" },
+    { id: "caravans",    label: "Caravans & motorhomes" },
+    { id: "govt",        label: "Government & emergency" },
+    { id: "farm",        label: "Farm & machinery" }
   ],
+
+  gallerySection: {
+    filterHint: "Tap a type — the row above filters to match."
+  },
 
   // ============ DEDICATED BIKES SECTION ============
   bikesShowcase: {
@@ -313,8 +350,8 @@ export const content = Object.freeze({
     body: "Harleys, sportbikes, cruisers, classics. Gracie details bikes with the same care as her best cars — every chrome surface, every leather seam, every painted panel. Smaller booking window, premium finish.",
     cta: { label: "Build my bike price", href: "#configurator" },
     photos: [
-      { src: "assets/bikes/03-harley-road-glide-front.jpg", alt: "Black Harley-Davidson Road Glide — front-on, glassy finish",       featured: true,  span: 2 },
-      { src: "assets/bikes/02-harley-rear.jpg",             alt: "Harley-Davidson — finished, depth + clarity + protection restored" },
+      { src: "assets/bikes/04-harley-road-glide-black.jpg", alt: "Harley-Davidson Road Glide — blacked out, every surface detailed", featured: true,  span: 2 },
+      { src: "assets/bikes/05-harley-custom-turbo.jpg",     alt: "Custom turbocharged Harley — candy paint and polished spokes" },
       { src: "assets/bikes/01-suzuki-vz1500.jpg",           alt: "Suzuki VZ1500 — mid-wash, coming up unreal" }
     ]
   },
@@ -327,10 +364,10 @@ export const content = Object.freeze({
     cta: { label: "Get a price for my rig", href: "#configurator" },
     photos: [
       { src: "assets/vans-rvs/06-ram-horsefloat.jpg",         alt: "Ram pulled up to a white horsefloat — country setting", featured: true, span: 2 },
-      { src: "assets/vans-rvs/01-hiace-silver.jpg",           alt: "Toyota Hiace — detail refresher" },
-      { src: "assets/vans-rvs/03-hiace-interior-cleaned.jpg", alt: "Empty Hiace interior — deep-cleaned, road-ready" },
-      { src: "assets/vans-rvs/04-dog-grooming-van.jpg",       alt: "Dog-grooming work van — de-dog-haired + deep interior" },
-      { src: "assets/vans-rvs/02-hiace-wheel-macro.jpg",      alt: "Hiace wheel macro — bronze rim spec shot" }
+      { src: "assets/vans-rvs/07-horsefloat-longreach.jpg",   alt: "Longreach horsefloat — washed and cut back under the carport" },
+      { src: "assets/vans-rvs/08-horsefloat-interior.jpg",    alt: "Horsefloat interior — stalls, padding and matting cleaned out" },
+      { src: "assets/vans-rvs/09-horsefloat-karakar.jpg",     alt: "Kara Kar horsefloat — polished alloy and paint, ready to travel" },
+      { src: "assets/vans-rvs/10-motorhome-alpine.jpg",       alt: "Alpine motorhome — full exterior wash and cut on the driveway" }
     ]
   },
 
@@ -343,7 +380,7 @@ export const content = Object.freeze({
       { src: "assets/detail-shots/03-branded-number-plate.jpg",       alt: "GMC Denali grille close-up — Goldy Detailing branded number plate" },
       { src: "assets/detail-shots/02-business-cards-handover.jpg",    alt: "SsangYong handover — protective steering-wheel wrap + Goldy business cards" },
       { src: "assets/detail-shots/01-sq7-wheel-calipers.jpg",         alt: "Matte SQ7 wheel + red brake calipers — premium spec" },
-      { src: "assets/detail-shots/04-bmw-interior.jpg",               alt: "BMW X3 interior — finished, dog air-freshener intact" }
+      { src: "assets/detail-shots/05-goldy-air-freshener.jpg",        alt: "Goldy Detailing air freshener left hanging — every car goes back smelling new" }
     ]
   },
 
