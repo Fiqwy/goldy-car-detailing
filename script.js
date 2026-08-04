@@ -16,14 +16,28 @@ let conditionPick = null;
 // Every booking link carries the visitor's condition pick so Gracie can see what
 // she's walking into before she quotes. Any anchor with a data-sms-body gets its
 // href rebuilt from that base plus the current condition.
+//
+// ORDER MATTERS. Every message ends with blank prompts the visitor types into,
+// so the body is composed in three parts:
+//   details  (what they picked)  →  condition  (optional)  →  fill-ins  (last)
+// data-sms-body therefore holds the DETAILS ONLY — never the trailing blanks.
+// Anything appended after the fill-ins lands inside the visitor's own answer
+// ("Vehicle: Condition: ...") and destroys the prompt.
+const SMS_FILL_INS = 'My name: , Suburb: , Vehicle: ';
+
 function conditionSuffix() {
-  return conditionPick ? `Condition: ${conditionPick.label} (suggested ${conditionPick.tier}). ` : '';
+  return conditionPick ? `Condition: ${conditionPick.label} (suggested ${conditionPick.tier}).` : '';
 }
-function buildSmsHref(baseBody) {
-  return `${content.booking.smsHref}?&body=${encodeURIComponent(baseBody + conditionSuffix())}`;
+// A link can override the blanks via data-sms-fill when it already knows some of
+// them (the price builder asks the vehicle up front, so it never re-asks).
+function buildSmsHref(details, fillIns = SMS_FILL_INS) {
+  const lead = [String(details || '').trim(), conditionSuffix()].filter(Boolean).join(' ');
+  return `${content.booking.smsHref}?&body=${encodeURIComponent(lead ? `${lead} ${fillIns}` : fillIns)}`;
 }
 function refreshSmsLinks() {
-  document.querySelectorAll('[data-sms-body]').forEach(a => { a.href = buildSmsHref(a.dataset.smsBody); });
+  document.querySelectorAll('[data-sms-body]').forEach(a => {
+    a.href = buildSmsHref(a.dataset.smsBody, a.dataset.smsFill || SMS_FILL_INS);
+  });
 }
 // configurator.js re-renders its CTA on demand and fires this when it does.
 document.addEventListener('goldy:sms-refresh', refreshSmsLinks);
@@ -55,7 +69,7 @@ function renderHero() {
   $('#heroCtas').innerHTML = `
     <div class="hero-cta-row">
       <a href="${h.primaryCta.href}" class="btn btn-primary">${h.primaryCta.label} <span class="arrow">→</span></a>
-      <a href="${h.secondaryCta.href}" class="btn btn-ghost" data-sms-body="Hi Gracie! I'd like to book a detail. My name: , Suburb: , Vehicle: ">${h.secondaryCta.label}</a>
+      <a href="${h.secondaryCta.href}" class="btn btn-ghost" data-sms-body="Hi Gracie! I'd like to book a detail.">${h.secondaryCta.label}</a>
     </div>
     <a href="${h.maintenanceCta.href}" class="btn btn-ghost btn-maint">${h.maintenanceCta.label} <span class="arrow">→</span></a>
   `;
@@ -108,7 +122,7 @@ function renderMaintenance() {
   const enquireEl = $('#maintEnquire');
 
   function syncCtas() {
-    const body = intro => `Hi Gracie! ${intro} Preferred cadence: ${cadence}. My name: , Suburb: , Vehicle: `;
+    const body = intro => `Hi Gracie! ${intro} Preferred cadence: ${cadence}.`;
     bookEl.dataset.smsBody = body("I'm a returning client and I'd like to book my next clean.");
     enquireEl.dataset.smsBody = body("I'd like to enquire about joining your maintenance plan.");
     refreshSmsLinks();
@@ -260,7 +274,7 @@ function renderCustomBuilder() {
     }).filter(Boolean);
     return `Hi Gracie! Custom detail from the site. Base: ${BASE_NAME} (${currencyAU(BASE_PRICE)}). ` +
       `Added: ${picked.length ? picked.join(', ') : 'nothing extra yet'}. ` +
-      `Total: ${currencyAU(total())}. My name: , Suburb: , Vehicle: `;
+      `Total: ${currencyAU(total())}.`;
   }
   function sync() {
     const t = total();
@@ -415,13 +429,21 @@ function renderTestimonials() {
       <p class="tmt-sub">${p.sub}</p>
     </article>
   `).join('');
-  // Update the section head if a custom headline shipped
+  // Update the section head if a custom headline shipped.
   const head = document.querySelector('.testimonials .section-head');
-  if (head && t.headline) {
-    const h2 = head.querySelector('h2');
-    const p  = head.querySelector('p');
-    if (h2) h2.textContent = t.headline;
-    if (p) p.textContent = t.sub; else if (t.sub) head.insertAdjacentHTML('beforeend', `<p>${t.sub}</p>`);
+  if (!head) return;
+  const h2 = head.querySelector('h2');
+  if (h2 && t.headline) h2.textContent = t.headline;
+
+  // NEVER `head.querySelector('p')` — this head carries no body copy, so its
+  // first <p> is the .eyebrow, and writing textContent into it wipes the label
+  // AND the <span class="dot"> gold dot inside it.
+  const sub = head.querySelector('p:not(.eyebrow)');
+  if (t.sub) {
+    if (sub) sub.textContent = t.sub;
+    else head.insertAdjacentHTML('beforeend', `<p>${t.sub}</p>`);
+  } else if (sub) {
+    sub.remove();
   }
 }
 
@@ -678,7 +700,7 @@ document.addEventListener('click', e => {
 function renderContact() {
   const b = content.booking;
   $('#contactChannels').innerHTML = `
-    <a class="channel" href="${b.smsHref}" data-sms-body="Hi Gracie! I'd like to book a detail. My name: , Suburb: , Vehicle: ">
+    <a class="channel" href="${b.smsHref}" data-sms-body="Hi Gracie! I'd like to book a detail.">
       <span class="channel-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></svg>
       </span>
@@ -716,7 +738,7 @@ function renderFooter() {
     `<li><a href="${s.built ? `suburbs/${s.slug}.html` : '#suburbs'}">${s.name}</a></li>`
   ).join('');
   $('#footerDirect').innerHTML = `
-    <li><a href="${content.booking.smsHref}" data-sms-body="Hi Gracie! ">Text Gracie</a></li>
+    <li><a href="${content.booking.smsHref}" data-sms-body="Hi Gracie!">Text Gracie</a></li>
     <li><a href="${content.brand.phoneHref}">${content.brand.phone}</a></li>
     <li><a href="${content.booking.instagramDm}">${content.brand.instagram}</a></li>
   `;
@@ -802,6 +824,11 @@ renderCondition();
 renderContact();
 renderFooter();
 renderNav();
+// renderCondition() runs the last refreshSmsLinks() of the render pass, but
+// renderContact() and renderFooter() inject data-sms-body anchors AFTER it —
+// without this sweep those two open SMS with an empty message until the visitor
+// happens to touch the condition slider.
+refreshSmsLinks();
 renderSchema();
 applySplits();
 

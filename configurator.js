@@ -97,10 +97,15 @@ function renderResult(content, state) {
   const HEDGE = "Times are estimates so Gracie doesn't double-book her day.";
 
   // SMS-first: fold the build into a concise text body (SMS has no subject).
-  // The href itself is composed by script.js from data-sms-body so the
-  // visitor's condition pick rides along; this is the fallback if that misses.
-  const smsBody = `Hi Gracie! Price builder: ${vehicle.label} · ${goal.label} · ${pkg.tier} · ${currencyAU(price)}. My name: , Suburb: `;
-  const smsHref = `${content.booking.smsHref}?&body=${encodeURIComponent(smsBody)}`;
+  // The href itself is composed by script.js from data-sms-body (details) +
+  // condition + data-sms-fill (the blanks, which must stay last); this literal
+  // href is only the fallback if that refresh misses.
+  // The goal and the package are named identically in content.js, so printing
+  // both read "Tidy up · Tidy up". Only the package tier is stated.
+  const smsBody = `Hi Gracie! Price builder: ${vehicle.label} · ${pkg.tier} · ${currencyAU(price)}.`;
+  const smsFill = 'My name: , Suburb: ';   // vehicle already stated above — never re-asked
+  const smsHref = `${content.booking.smsHref}?&body=${encodeURIComponent(`${smsBody} ${smsFill}`)}`;
+  const attr = s => s.replace(/"/g, '&quot;');
 
   const includesList = pkg.includes.map(i => `<li>${i}</li>`).join('');
 
@@ -118,7 +123,7 @@ function renderResult(content, state) {
       <ul class="cfg-includes">${includesList}</ul>
     </details>
     <div class="hero-ctas cfg-ctas">
-      <a href="${smsHref}" data-sms-body="${smsBody.replace(/"/g, '&quot;')}" class="btn btn-primary">Text my booking <span class="arrow">→</span></a>
+      <a href="${smsHref}" data-sms-body="${attr(smsBody)}" data-sms-fill="${attr(smsFill)}" class="btn btn-primary">Text my booking <span class="arrow">→</span></a>
       <a href="${TEL}" class="btn btn-ghost">Call · ${PHONE}</a>
     </div>
     <p class="cfg-hedge">${HEDGE}</p>

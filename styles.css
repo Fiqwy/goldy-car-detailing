@@ -24,8 +24,11 @@
   /* Text */
   --text-primary:   #F4F2EE;
   --text-body:      #C7CBD3;
+  /* --text-muted is the dimmest text token that clears WCAG AA (4.5:1) on
+     every surface in this palette — 5.21:1 even on the lightest (--bg-elev).
+     The old --text-faint (#4E5462) bottomed out at 2.14:1 and is retired;
+     its only two consumers now use --text-muted. */
   --text-muted:     #8C92A0;
-  --text-faint:     #4E5462;
 
   /* Type */
   --font-display:   'Manrope', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -35,7 +38,6 @@
   --gap-section:    clamp(5rem, 10vw, 9rem);
   --gap-inner:      clamp(2rem, 4vw, 4rem);
   --container:      min(1280px, 92vw);
-  --container-narrow: min(960px, 92vw);
 
   /* Radius */
   --r-sm:           10px;
@@ -126,7 +128,6 @@ p { margin: 0; color: var(--text-body); }
 
 /* -------- LAYOUT -------- */
 .container { width: var(--container); margin-inline: auto; }
-.container-narrow { width: var(--container-narrow); margin-inline: auto; }
 section { padding-block: var(--gap-section); position: relative; }
 .section-head { max-width: 56rem; margin: 0 auto var(--gap-inner); text-align: center; }
 .section-head .eyebrow { display: inline-block; margin-bottom: 1.1rem; }
@@ -323,10 +324,11 @@ section { padding-block: var(--gap-section); position: relative; }
   filter: brightness(0.6) saturate(1.05) contrast(1.04);
   transform: scale(1.06);
 }
+/* Retired reveal layer — permanently covered by .hero-video, so no
+   compositor hint (it never animates in the shipped design). */
 .hero-bg .after-layer {
   position: absolute; inset: 0;
   clip-path: inset(0 100% 0 0);
-  will-change: clip-path;
 }
 .hero-bg .after-layer img {
   filter: brightness(0.85) saturate(1.18) contrast(1.05);
@@ -654,18 +656,6 @@ section { padding-block: var(--gap-section); position: relative; }
   border-radius: 50%;
   box-shadow: 0 0 8px var(--gold);
 }
-.cfg-slot {
-  padding: 0.9rem 1.1rem;
-  background: rgba(224, 184, 114, 0.06);
-  border: 1px solid var(--gold-line);
-  border-radius: var(--r);
-  font-size: 0.92rem;
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-.cfg-slot strong { color: var(--gold); }
 
 /* -------- PACKAGES (sticky morphing) -------- */
 .packages {
@@ -949,34 +939,6 @@ section { padding-block: var(--gap-section); position: relative; }
   flex-direction: column;
   gap: 1rem;
 }
-.tmt-stars { color: var(--gold); letter-spacing: 0.15em; font-size: 1rem; }
-.tmt-quote {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 1.05rem;
-  letter-spacing: -0.005em;
-  line-height: 1.4;
-  color: var(--text-primary);
-}
-.tmt-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top: 1px solid var(--line);
-  padding-top: 0.9rem;
-  font-size: 0.85rem;
-}
-.tmt-name { color: var(--text-primary); font-weight: 600; }
-.tmt-vehicle { color: var(--text-muted); }
-.tmt-placeholder {
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-  padding: 3px 8px;
-  border: 1px dashed var(--line-strong);
-  border-radius: 4px;
-}
 
 /* -------- ABOUT -------- */
 .about {
@@ -1214,8 +1176,18 @@ section { padding-block: var(--gap-section); position: relative; }
   color: var(--text-muted);
   margin-bottom: 1rem;
 }
-.footer ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
-.footer a { color: var(--text-body); font-size: 0.92rem; display: inline-block; padding: 0.35rem 0; transition: color 180ms var(--ease-out); }
+/* Gap trimmed to absorb the taller links so the column rhythm is unchanged. */
+.footer ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.1rem; }
+/* min-height 44px = minimum comfortable tap target (was 34px). */
+.footer a {
+  color: var(--text-body);
+  font-size: 0.92rem;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.35rem 0;
+  transition: color 180ms var(--ease-out);
+}
 .footer a:hover { color: var(--gold); }
 .footer-tag {
   font-family: var(--font-display);
@@ -1235,7 +1207,7 @@ section { padding-block: var(--gap-section); position: relative; }
   padding-top: 1.6rem;
   border-top: 1px solid var(--line);
   font-size: 0.82rem;
-  color: var(--text-faint);
+  color: var(--text-muted);
   flex-wrap: wrap;
   gap: 0.8rem;
 }
@@ -1320,12 +1292,27 @@ body.has-cursor .cursor-glow { opacity: 1; }
   .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
   .contact-grid { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
+}
 
-  /* No hover on touch → these promoted layers cost GPU memory for zero benefit.
-     Let the browser promote on demand instead of pinning dozens of layers. */
+/* -------- HOVER-ONLY COMPOSITOR HINTS --------
+   These images only ever transform on :hover, so promoting them is pure cost
+   on touch. Opted IN here rather than opted out in a max-width block — an
+   opt-out is order-dependent at equal specificity and silently loses to any
+   base rule declared later in the file. */
+@media (hover: hover) and (min-width: 1025px) {
   .showcase-photo img,
   .behind-tile img,
-  .featured-photo img { will-change: auto; }
+  .featured-photo img { will-change: transform; }
+}
+
+/* -------- ULTRA-NARROW (iPhone SE 1st gen, Display Zoom) --------
+   Below 1025px .nav-links are hidden and the burger is the ONLY route to
+   Bikes / Caravans / How rough is it / Contact. At 320px the nav CTA pushed
+   the burger 73% off-screen, so drop it here — the hero repeats the same
+   "Get my price" CTA about 100px further down. */
+@media (max-width: 360px) {
+  .nav-cta .btn-primary { display: none; }
+  .nav-inner { gap: 0.6rem; }
 }
 
 @media (max-width: 640px) {
@@ -1409,11 +1396,13 @@ body.has-cursor .cursor-glow { opacity: 1; }
   border: 1px solid var(--line);
   isolation: isolate;
 }
+/* No will-change here on purpose — it is opted IN only for pointer devices
+   at >=1025px (see "HOVER-ONLY COMPOSITOR HINTS" below). A base declaration
+   here would win over any max-width override that appears earlier in the file. */
 .showcase-photo img {
   width: 100%; height: 100%;
   object-fit: cover;
   transition: transform 700ms var(--ease-out);
-  will-change: transform;
 }
 .showcase-photo:hover img { transform: scale(1.05); }
 .showcase-photo.span-2 { grid-column: span 2; grid-row: span 2; }
@@ -1452,11 +1441,11 @@ body.has-cursor .cursor-glow { opacity: 1; }
   border: 1px solid var(--line);
   isolation: isolate;
 }
+/* will-change opted in under @media (hover: hover) and (min-width: 1025px). */
 .behind-tile img {
   width: 100%; height: 100%;
   object-fit: cover;
   transition: transform 700ms var(--ease-out), filter 500ms var(--ease-out);
-  will-change: transform;
 }
 .behind-tile:hover img { transform: scale(1.04); filter: brightness(1.05); }
 .behind-tile figcaption {
@@ -1566,156 +1555,15 @@ body.has-cursor .cursor-glow { opacity: 1; }
 .reveal {
   background: var(--bg-deep);
 }
-.reveal-frame {
-  position: relative;
-  max-width: 1100px;
-  margin: 0 auto;
-  aspect-ratio: 16/10;
-  border-radius: var(--r-lg);
-  overflow: hidden;
-  cursor: ew-resize;
-  user-select: none;
-  background: var(--bg-elev);
-  box-shadow: var(--shadow-deep);
-  border: 1px solid var(--line);
-}
-.reveal-before,
-.reveal-after {
-  position: absolute;
-  inset: 0;
-}
-.reveal-before {
-  clip-path: inset(0 50% 0 0);
-  z-index: 2;
-  will-change: clip-path;
-}
-.reveal-before img,
-.reveal-after img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-/* Before = dull, dim, slightly faded — "tired paint" feel */
-.reveal-before img {
-  filter: saturate(0.45) brightness(0.55) contrast(0.85) blur(0.4px);
-}
-/* After = vivid, sharp, premium */
-.reveal-after img {
-  filter: saturate(1.15) brightness(1.05) contrast(1.08);
-}
-.reveal-tag {
-  position: absolute;
-  top: 1.2rem;
-  padding: 6px 14px;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 0.78rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  border-radius: 999px;
-  backdrop-filter: blur(8px);
-  z-index: 3;
-  pointer-events: none;
-}
-.reveal-tag-before {
-  left: 1.2rem;
-  background: rgba(7, 9, 15, 0.7);
-  color: var(--text-muted);
-  border: 1px solid var(--line);
-}
-.reveal-tag-after {
-  right: 1.2rem;
-  background: linear-gradient(95deg, var(--gold-warm), var(--gold-deep));
-  color: #1A1208;
-}
-.reveal-handle {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 2px;
-  z-index: 4;
-  transform: translateX(-50%);
-  cursor: ew-resize;
-  outline: none;
-  will-change: left;
-}
-.reveal-handle:focus-visible .reveal-handle-knob {
-  box-shadow: 0 0 0 3px var(--gold), 0 0 30px rgba(224, 184, 114, 0.6);
-}
-.reveal-handle-line {
-  position: absolute;
-  inset: 0 50% 0 50%;
-  width: 2px;
-  margin-left: -1px;
-  background: linear-gradient(180deg, transparent 0%, var(--gold) 8%, var(--gold) 92%, transparent 100%);
-  box-shadow: 0 0 12px rgba(224, 184, 114, 0.5);
-}
-.reveal-handle-knob {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--gold-warm), var(--gold), var(--gold-deep));
-  color: #1A1208;
-  display: grid;
-  place-items: center;
-  box-shadow: 0 16px 40px -10px rgba(224, 184, 114, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  transition: transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
-}
-.reveal-handle:hover .reveal-handle-knob,
-.reveal-handle.is-grabbing .reveal-handle-knob {
-  transform: translate(-50%, -50%) scale(1.08);
-  box-shadow: 0 22px 60px -10px rgba(224, 184, 114, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.5);
-}
-.reveal-handle.is-grabbing { cursor: grabbing; }
-.reveal-handle-hint {
-  position: absolute;
-  top: calc(50% + 42px);
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: var(--font-body);
-  font-weight: 500;
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--gold);
-  background: rgba(7, 9, 15, 0.6);
-  padding: 4px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--gold-line);
-  backdrop-filter: blur(6px);
-  opacity: 1;
-  transition: opacity 300ms var(--ease-out);
-  white-space: nowrap;
-  pointer-events: none;
-}
-.reveal-frame.is-dragged .reveal-handle-hint { opacity: 0; }
-
 /* =====================================================================
-   RESPONSIVE — pillars stack, slider keeps 4:3 on mobile
+   RESPONSIVE — pillars stack
    ===================================================================== */
 @media (max-width: 1024px) {
   .why-grid { grid-template-columns: 1fr 1fr; }
-  .reveal-frame { aspect-ratio: 4/3; }
 }
 @media (max-width: 640px) {
   .why-grid { grid-template-columns: 1fr; gap: 0.7rem; }
   .why-pillar { padding: 1.6rem 1.3rem; }
-  .reveal-frame { aspect-ratio: 1/1; }
-  .reveal-handle-knob { width: 48px; height: 48px; }
-  .reveal-tag { font-size: 0.7rem; padding: 5px 10px; top: 0.9rem; }
-  .reveal-tag-before { left: 0.9rem; }
-  .reveal-tag-after { right: 0.9rem; }
-}
-
-/* Reduced motion — slider still draggable but no auto-tease */
-@media (prefers-reduced-motion: reduce) {
-  .reveal-handle-knob { transition: none; }
 }
 
 /* =====================================================================
@@ -1751,12 +1599,12 @@ body.has-cursor .cursor-glow { opacity: 1; }
   box-shadow: var(--shadow-deep);
   isolation: isolate;
 }
+/* will-change opted in under @media (hover: hover) and (min-width: 1025px). */
 .featured-photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 1200ms var(--ease-out);
-  will-change: transform;
 }
 .featured-photo:hover img { transform: scale(1.03); }
 .featured-photo::after {
@@ -1960,48 +1808,6 @@ body.has-cursor .cursor-glow { opacity: 1; }
 .cfg-includes-accordion > summary:hover { background: var(--gold-soft); }
 .cfg-includes-accordion .cfg-includes { padding: 0.2rem 1.1rem 1.1rem; }
 
-/* Custom goal — add-on picker */
-.cfg-addons { margin-top: 0.1rem; }
-.cfg-addons-label {
-  font-size: 0.82rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-  margin-bottom: 0.7rem;
-}
-.cfg-addons-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
-  gap: 0.7rem;
-}
-.cfg-addon {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.6rem;
-  padding: 0.85rem 1rem;
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px solid var(--line);
-  border-radius: var(--r);
-  text-align: left;
-  cursor: pointer;
-  transition: border 200ms var(--ease-out), background 200ms var(--ease-out), transform 200ms var(--ease-out);
-}
-.cfg-addon:hover { border-color: var(--gold-line); transform: translateY(-2px); }
-.cfg-addon.is-selected {
-  border-color: var(--gold);
-  background: var(--gold-soft);
-  box-shadow: 0 0 0 1px var(--gold);
-}
-.cfg-addon-name { font-weight: 600; font-size: 0.92rem; color: var(--text-primary); }
-.cfg-addon-price {
-  font-family: var(--font-display);
-  font-weight: 700;
-  color: var(--gold);
-  font-size: 0.92rem;
-  white-space: nowrap;
-}
-
 .cfg-ctas { margin-top: 0.1rem; }
 .cfg-hedge {
   margin-top: 0.7rem;
@@ -2016,8 +1822,6 @@ body.has-cursor .cursor-glow { opacity: 1; }
   text-align: center;
 }
 
-/* Custom build-your-own picker */
-.cfg-builder { display: grid; gap: 1.1rem; }
 .cfg-svc-group-title {
   font-size: 0.78rem;
   text-transform: uppercase;
@@ -2076,7 +1880,6 @@ body.has-cursor .cursor-glow { opacity: 1; }
   color: var(--text-primary);
   line-height: 1.5;
 }
-.pkg-price-custom { font-size: 1.5rem; }
 
 /* ===================== BUILD-YOUR-OWN SECTION ===================== */
 .build { position: relative; padding: var(--gap-section) 0; }
@@ -2147,7 +1950,9 @@ body.has-cursor .cursor-glow { opacity: 1; }
 }
 .build-base-price { font-family: var(--font-display); font-weight: 800; color: var(--gold); font-size: 1.3rem; }
 .build-base-acc { margin-top: 0.7rem; border: none; background: transparent; border-radius: 0; }
-.build-base-acc > summary { padding: 0.3rem 0; font-size: 0.85rem; }
+/* min-height 44px = minimum comfortable tap target (was 30.7px).
+   Padding stays tight so the disclosure still reads as a subtle sub-control. */
+.build-base-acc > summary { padding: 0.3rem 0; font-size: 0.85rem; min-height: 44px; }
 .build-base-acc .cfg-includes { padding: 0.2rem 0 0; }
 .build-add-label {
   font-size: 0.82rem;
@@ -2479,7 +2284,7 @@ body.has-cursor .cursor-glow { opacity: 1; }
 .cond-photo-note {
   margin-top: 0.9rem;
   font-size: 0.76rem; line-height: 1.5;
-  color: var(--text-faint);
+  color: var(--text-muted);
 }
 
 .cond-readout { display: flex; flex-direction: column; gap: 0.7rem; min-width: 0; }

@@ -46,8 +46,8 @@ export const content = Object.freeze({
 
   // Benefits-led trust strip — only one stat is rounded, rest are factual badges
   trustStrip: [
-    { value: "100", suffix: "+", label: "cars detailed · Gold Coast" },     // ✓ approx from 84 IG posts
-    { value: "5",   suffix: "★", label: "word of mouth driven" },           // CONFIRM — based on returning clients
+    { value: "100", suffix: "+", label: "cars detailed · Gold Coast" },     // CONFIRM — approx, counted off 84 IG posts
+    { value: "100", suffix: "%", label: "owner-operated · Gracie every job" },
     { value: "0",   label: "shop visits — Gracie comes to you" },
     { value: "FREE",label: "personalised quote · ~15 min reply" }
   ],
@@ -275,7 +275,9 @@ export const content = Object.freeze({
     { src: "assets/gallery/10-denali.jpg",                alt: "GMC Denali — full premium detail",                          category: "special" },
     { src: "assets/gallery/11-chevy-apache-1959.jpg",     alt: "1959 Chevrolet Apache — classic ute, showroom maintenance", category: "special" },
     { src: "assets/gallery/24-hsv-clubsport-side.jpg",    alt: "Red HSV Clubsport — side profile after detail",             category: "special" },
-    { src: "assets/gallery/25-white-4wd.jpg",             alt: "White off-road 4WD — finished and ready for the next trip", category: "special" },
+    // 25-white-4wd.jpg removed 2026-08-04: it is a second (wider) frame of the SAME
+    // black 1959 Chevy Apache in the same car park as 11-chevy-apache-1959.jpg above,
+    // mislabelled off the white Prado parked in the background. File left on disk.
 
     // ---- SALE-READY (4) ----
     { src: "assets/gallery/12-santa-fe-sale.jpg",         alt: "Hyundai Santa Fe — sale-ready detail",          category: "resale"  },
@@ -379,15 +381,15 @@ export const content = Object.freeze({
   },
 
   // Word-of-mouth proof — TRUE without being fabricated quotes.
-  // Real customer-name testimonials swap in here once Gracie shares IG/Google screenshots.
+  // Named customer testimonials swap in here once Gracie shares her IG/Google screenshots.
   testimonials: {
     headline: "Word of mouth, made visible.",
-    sub: "Real customer quotes load here once Gracie shares the screenshots — never fabricated.",
+    sub: "Goldy grew off clients handing her number to their mates. Here's what that looks like from the outside.",
     proofPoints: [
       {
-        metric: "100+",
-        label: "returning clients",
-        sub: "Some on her fortnightly maintenance plan since launch — Porsches, Skylines, a 1959 Chevy."
+        metric: "Regulars",
+        label: "who book on repeat",
+        sub: "Porsches, Skylines and a 1959 Chevy sit on her maintenance plan — some fortnightly since launch."  // CONFIRM
       },
       {
         metric: "Female-owned",

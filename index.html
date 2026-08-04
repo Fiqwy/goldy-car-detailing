@@ -95,10 +95,14 @@
        ============================================================ -->
   <main id="top">
     <section class="hero" id="hero">
-      <div class="hero-bg">
-        <img id="heroBefore" src="" alt="" loading="eager" fetchpriority="high">
+      <!-- Decorative hero backdrop. The autoplay .hero-video covers this layer
+           entirely; it only shows through under prefers-reduced-motion. Both
+           images are aria-hidden because script.js writes a "— before"/"— after"
+           alt onto them and the site no longer makes a before/after promise. -->
+      <div class="hero-bg" aria-hidden="true">
+        <img id="heroBefore" src="" alt="" loading="lazy">
         <div class="after-layer" id="heroAfterLayer">
-          <img id="heroAfter" src="" alt="" loading="eager">
+          <img id="heroAfter" src="" alt="" loading="lazy">
         </div>
       </div>
       <canvas class="hero-shader" id="heroShader" aria-hidden="true"></canvas>
@@ -110,10 +114,13 @@
         <div class="hero-ctas" id="heroCtas"></div>
       </div>
 
-      <div class="hero-meta">
-        <span id="heroBeforeLabel">Drag to reveal — scroll to transform</span>
+      <!-- Retired with the before/after reveal (.hero-meta is display:none).
+           Kept in the DOM only because script.js still writes #heroBeforeLabel;
+           text left empty so no before/after claim can ever surface. -->
+      <div class="hero-meta" aria-hidden="true">
+        <span id="heroBeforeLabel"></span>
         <span class="gold-line"></span>
-        <span id="heroAfterLabel">After</span>
+        <span id="heroAfterLabel"></span>
       </div>
       <div class="scroll-cue" aria-hidden="true"></div>
     </section>
@@ -372,7 +379,7 @@
     <!-- ============================================================
          SUBURBS
          ============================================================ -->
-    <section class="suburbs">
+    <section class="suburbs" id="suburbs">
       <div class="container">
         <div class="section-head">
           <p class="eyebrow"><span class="dot"></span> Service area</p>
