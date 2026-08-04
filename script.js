@@ -39,8 +39,52 @@ function refreshSmsLinks() {
     a.href = buildSmsHref(a.dataset.smsBody, a.dataset.smsFill || SMS_FILL_INS);
   });
 }
+// A compact condition picker that rides along with EVERY booking flow, so
+// Gracie always learns how dirty the car is no matter which package or path the
+// visitor takes. Any `[data-cond-chips]` mount gets one; they all drive the same
+// `conditionPick` and stay in sync with the big slider in #condition.
+function renderConditionChips(mount) {
+  const c = content.condition;
+  if (!mount || !c || !c.enabled) return;
+  mount.innerHTML = `
+    <p class="cond-chips-label">How dirty is it? <span>so Gracie brings the right gear</span></p>
+    <div class="cond-chips" role="group" aria-label="How dirty is your car?">
+      ${c.levels.map(l => `<button type="button" class="cond-chip" data-cond-level="${l.id}" aria-pressed="false">${l.label}</button>`).join('')}
+    </div>`;
+}
+function syncConditionChips() {
+  document.querySelectorAll('[data-cond-chips]').forEach(mount => {
+    if (!mount.children.length) renderConditionChips(mount);
+    mount.querySelectorAll('[data-cond-level]').forEach(b => {
+      const on = !!conditionPick && b.dataset.condLevel === conditionPick.id;
+      b.classList.toggle('is-selected', on);
+      b.setAttribute('aria-pressed', String(on));
+    });
+  });
+}
+// One delegated handler covers every chip set, including ones rendered later.
+document.addEventListener('click', e => {
+  const btn = e.target.closest('[data-cond-level]');
+  if (!btn) return;
+  const c = content.condition;
+  const i = c.levels.findIndex(l => l.id === btn.dataset.condLevel);
+  if (i < 0) return;
+  const l = c.levels[i];
+  const p = content.packages.find(x => x.id === l.packageId);
+  conditionPick = { id: l.id, label: l.label, tier: p.tier };
+  // Drive the big slider to match so the two never disagree.
+  const range = document.getElementById('condRange');
+  if (range) {
+    const step = Number(range.max) / c.levels.length;
+    range.value = Math.round((i + 0.5) * step);
+    range.dispatchEvent(new Event('input', { bubbles: true }));
+  } else {
+    syncConditionChips(); syncConditionChip(); refreshSmsLinks();
+  }
+});
+
 // configurator.js re-renders its CTA on demand and fires this when it does.
-document.addEventListener('goldy:sms-refresh', refreshSmsLinks);
+document.addEventListener('goldy:sms-refresh', () => { syncConditionChips(); refreshSmsLinks(); });
 
 // ============================================================
 // 0. CONTENT RENDER — populate everything from content.js
@@ -109,6 +153,7 @@ function renderMaintenance() {
     <div class="maintenance-pick" data-reveal>
       <div class="cadence-label">How often?</div>
       <div class="cadence-chips" id="cadenceChips">${chips}</div>
+      <div data-cond-chips></div>
       <div class="maintenance-ctas">
         <a href="#" class="btn btn-primary" id="maintBook">${m.bookCta.label} <span class="arrow">→</span></a>
         <a href="#" class="btn btn-ghost" id="maintEnquire">${m.enquireCta.label}</a>
@@ -253,6 +298,7 @@ function renderCustomBuilder() {
           <a href="#" class="btn btn-primary" id="buildBook">Book this build <span class="arrow">→</span></a>
           <a href="tel:+61427798045" class="btn btn-ghost">Call or text · 0427 798 045</a>
         </div>
+        <div data-cond-chips></div>
         <p class="cfg-foot">Prices are per service. Gracie confirms the final total for your vehicle.</p>
       </div>
     </div>
@@ -588,9 +634,14 @@ function renderCondition() {
       <div class="cond-visual">
         <figure class="cond-stage" id="condStage">
           <img class="cond-base" src="${c.photoClean.src}" alt="${c.photoClean.alt}" loading="lazy" decoding="async">
+          <span class="cond-l cond-floor" aria-hidden="true"><img src="${c.photoDirty ? c.photoDirty.src : 'assets/condition/dirty.jpg'}" alt="" loading="lazy" decoding="async"></span>
           <span class="cond-l cond-shine" aria-hidden="true"></span>
           <span class="cond-l cond-dust"  aria-hidden="true"></span>
           <span class="cond-l cond-grime" aria-hidden="true"></span>
+          <span class="cond-l cond-hair"  aria-hidden="true"></span>
+          <span class="cond-l cond-grit"  aria-hidden="true"></span>
+          <span class="cond-l cond-bits"  aria-hidden="true"></span>
+          <span class="cond-l cond-trash" aria-hidden="true"></span>
           <span class="cond-l cond-grain" aria-hidden="true"></span>
           <span class="cond-l cond-vig"   aria-hidden="true"></span>
         </figure>
@@ -647,8 +698,9 @@ function renderCondition() {
       `Hi Gracie! ${c.smsIntro}: ${l.label}. Looks like ${p.tier} ` +
       `(${currencyAU(p.priceFrom)} from). My name: , Suburb: , Vehicle: `
     )}`;
-    conditionPick = touched ? { label: l.label, tier: p.tier } : null;
+    conditionPick = touched ? { id: l.id, label: l.label, tier: p.tier } : null;
     syncConditionChip();
+    syncConditionChips();
     refreshSmsLinks();   // carry the pick into every other booking link
   }
 
@@ -694,7 +746,7 @@ function syncConditionChip() {
     <button type="button" class="form-condition-clear" id="formConditionClear">Clear</button>`;
 }
 document.addEventListener('click', e => {
-  if (e.target.closest('#formConditionClear')) { conditionPick = null; syncConditionChip(); }
+  if (e.target.closest('#formConditionClear')) { conditionPick = null; syncConditionChip(); syncConditionChips(); refreshSmsLinks(); }
 });
 
 function renderContact() {

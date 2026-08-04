@@ -2182,10 +2182,42 @@ body.has-cursor .cursor-glow { opacity: 1; }
 }
 .cond-l { position: absolute; inset: 0; pointer-events: none; }
 
+/* Real photographic grime. The dirty reference photo shares this framing, and
+   its lower ~40% (the flat cargo floor with the two seat rails) registers
+   closely with the clean one — so we fade THAT region in and mask everything
+   above it, giving genuine ground-in stains instead of a painted-on wash. */
+.cond-floor {
+  z-index: 1;
+  opacity: clamp(0, calc((var(--dirt) - 0.10) * 1.1), 0.82);
+  -webkit-mask-image: linear-gradient(180deg, transparent 52%, rgba(0,0,0,0.35) 66%, #000 86%);
+  mask-image: linear-gradient(180deg, transparent 52%, rgba(0,0,0,0.35) 66%, #000 86%);
+}
+.cond-floor img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ---- The mess itself. Each layer crosses its threshold at a different point
+   so grot accumulates as you drag rather than switching on all at once:
+   dust → hair → grit → leaves → rubbish. All are static images whose only
+   animated property is opacity, so this stays compositor-cheap on mobile. ---- */
+.cond-hair, .cond-grit, .cond-bits, .cond-trash {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+/* Golden-retriever hair — Gracie runs two, and pet hair removal is a paid
+   service here, so it's the first mess a real owner would recognise. */
+.cond-hair  { z-index: 6; opacity: clamp(0, calc((var(--dirt) - 0.18) * 1.7), 0.9);  background-image: url("assets/condition/hair.svg"); }
+/* Sand, crumbs and ground-in grit. */
+.cond-grit  { z-index: 7; opacity: clamp(0, calc((var(--dirt) - 0.28) * 1.8), 0.95); background-image: url("assets/condition/grit.svg"); }
+/* Dry leaves, grass and twigs walked in off a driveway. */
+.cond-bits  { z-index: 8; opacity: clamp(0, calc((var(--dirt) - 0.46) * 2.2), 0.95); background-image: url("assets/condition/bits.svg"); }
+/* Actual rubbish — wrappers, a receipt, a cup lid, a straw. Last to appear,
+   because a car only reaches this once it has genuinely been let go. */
+.cond-trash { z-index: 9; opacity: clamp(0, calc((var(--dirt) - 0.58) * 2.6), 1);    background-image: url("assets/condition/trash.svg"); }
+
 /* Fresh-off-the-detail gloss — only present at the clean end, so sliding back
    toward "Pretty clean" visibly lifts the car rather than just removing dirt. */
 .cond-shine {
-  z-index: 1;
+  z-index: 2;
   opacity: calc((1 - var(--dirt)) * 0.55);
   mix-blend-mode: screen;
   background:
@@ -2195,8 +2227,8 @@ body.has-cursor .cursor-glow { opacity: 1; }
 
 /* Warm dust haze — the first thing to appear, settles over everything. */
 .cond-dust {
-  z-index: 2;
-  opacity: calc(var(--dirt) * 0.30);
+  z-index: 3;
+  opacity: calc(var(--dirt) * 0.18);
   background:
     radial-gradient(120% 88% at 50% 8%, rgba(146,126,90,0) 30%, rgba(74,62,44,0.78) 100%),
     linear-gradient(180deg, rgba(150,130,96,0.30) 0%, rgba(72,60,42,0.44) 100%);
@@ -2205,7 +2237,7 @@ body.has-cursor .cursor-glow { opacity: 1; }
 /* Blotchy ground-in grime — coarse turbulence, multiplied so it darkens into
    the shadows the way real dirt collects. Scales up slightly as it builds. */
 .cond-grime {
-  z-index: 3;
+  z-index: 4;
   opacity: calc(var(--dirt) * 0.72);
   mix-blend-mode: multiply;
   transform: scale(calc(1 + var(--dirt) * 0.04));
@@ -2217,7 +2249,7 @@ body.has-cursor .cursor-glow { opacity: 1; }
 
 /* Fine dust/sand grain sitting on the surfaces. */
 .cond-grain {
-  z-index: 4;
+  z-index: 10;
   opacity: calc(var(--dirt) * 0.55);
   mix-blend-mode: soft-light;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='3' seed='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -2227,8 +2259,8 @@ body.has-cursor .cursor-glow { opacity: 1; }
 
 /* Edge grime — dirt always builds up worst around the edges and footwells. */
 .cond-vig {
-  z-index: 5;
-  opacity: calc(var(--dirt) * 0.50);
+  z-index: 11;
+  opacity: calc(var(--dirt) * 0.34);
   background:
     radial-gradient(88% 70% at 50% 42%, transparent 42%, rgba(28,22,14,0.62) 100%),
     linear-gradient(0deg, rgba(34,27,17,0.55) 0%, transparent 34%);
@@ -2340,3 +2372,39 @@ body.has-cursor .cursor-glow { opacity: 1; }
   .cond-ctas .btn { width: 100%; justify-content: center; }
   .cond-ends span { max-width: 45%; }
 }
+
+/* ---- Compact condition chips ----------------------------------------------
+   Mirrors the big "How rough is it?" slider into every booking flow (price
+   builder result, build-your-own, maintenance) so Gracie always learns the
+   condition regardless of which package the visitor picks. All instances share
+   one `conditionPick` and stay in sync with the slider. */
+.cond-chips-label {
+  margin: 1.1rem 0 0.55rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.cond-chips-label span {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+.cond-chips { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.cond-chip {
+  padding: 0.6rem 0.85rem;
+  min-height: 44px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-strong);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-body);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 180ms var(--ease-out), background 180ms var(--ease-out), color 180ms var(--ease-out);
+}
+.cond-chip.is-selected {
+  border-color: var(--gold);
+  background: var(--gold-soft);
+  color: var(--gold);
+}
+@media (hover: hover) { .cond-chip:hover { border-color: var(--gold-line); } }
+@media (max-width: 640px) { .cond-chip { flex: 1 1 auto; text-align: center; } }

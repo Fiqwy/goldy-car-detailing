@@ -78,7 +78,8 @@ Hero (autoplay video) · Trust strip · Maintenance plan · Why Goldy · Price b
 3. **Real testimonials** — 3-5 screenshots of IG/Google comments, with permission to use names.
 4. **A proper founder bio** — the current one was written for her, not by her.
 5. **ABN** for the footer.
-6. **A real before/after pair** (same vehicle, same angle, dirty then clean) would unlock a genuine before/after feature. The two interior photos used by the condition slider are a reference scale, not a matched pair.
+6. **A photo of a genuinely messy car interior.** The condition slider currently layers procedural dust, pet hair, grit and ground-in grime over a clean photo, plus the real dirty carpet blended into the floor. It reads as a dusty, neglected car — but it cannot show actual rubbish (cups, wrappers, kids' stuff), because drawn objects read as clipart at this size and the project doesn't ship fake-looking content. Gracie starts every job on a messy car, so one honest 'before' shot from the same tailgate angle would let the slider cross-fade to real mess and finish this feature properly.
+7. **A real before/after pair** (same vehicle, same angle, dirty then clean) would unlock a genuine before/after feature. The two interior photos used by the condition slider are a reference scale, not a matched pair.
 
 Search `content.js` for `CONFIRM` to find every one of these in place.
 
