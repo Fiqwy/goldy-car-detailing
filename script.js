@@ -43,48 +43,105 @@ function refreshSmsLinks() {
 // Gracie always learns how dirty the car is no matter which package or path the
 // visitor takes. Any `[data-cond-chips]` mount gets one; they all drive the same
 // `conditionPick` and stay in sync with the big slider in #condition.
-function renderConditionChips(mount) {
+// ---- The condition slider, as a reusable component -------------------------
+// The full version lives in #condition; compact copies ride along inside every
+// booking flow (price-builder result, build-your-own, maintenance) so the
+// visitor can show the state of their car right where they're quoting, and
+// Gracie always learns it. `--dirt` is written to the ROOT element, not to one
+// panel, so every stage on the page animates from a single source of truth and
+// the copies can never disagree with each other.
+const CONDITION_MAX = 100;
+
+function conditionBand(v) {
+  const L = content.condition.levels;
+  return Math.min(L.length - 1, Math.floor(v / (CONDITION_MAX / L.length)));
+}
+function conditionValueFor(i) {
+  return Math.round((i + 0.5) * (CONDITION_MAX / content.condition.levels.length));
+}
+// The layered grime stack — one real photo plus the debris layers above it.
+function conditionStageHTML(c) {
+  return `
+    <img class="cond-base" src="${c.photoClean.src}" alt="${c.photoClean.alt}" loading="lazy" decoding="async">
+    <span class="cond-l cond-floor" aria-hidden="true"><img src="assets/condition/dirty.jpg" alt="" loading="lazy" decoding="async"></span>
+    <span class="cond-l cond-shine" aria-hidden="true"></span>
+    <span class="cond-l cond-dust"  aria-hidden="true"></span>
+    <span class="cond-l cond-grime" aria-hidden="true"></span>
+    <span class="cond-l cond-hair"  aria-hidden="true"></span>
+    <span class="cond-l cond-grit"  aria-hidden="true"></span>
+    <span class="cond-l cond-bits"  aria-hidden="true"></span>
+    <span class="cond-l cond-trash" aria-hidden="true"></span>
+    <span class="cond-l cond-grain" aria-hidden="true"></span>
+    <span class="cond-l cond-vig"   aria-hidden="true"></span>`;
+}
+
+// Single entry point. Everything that changes the condition calls this.
+function setCondition(v, touched = true) {
+  const c = content.condition;
+  const t = Math.min(1, Math.max(0, v / CONDITION_MAX));
+  const i = conditionBand(v);
+  const l = c.levels[i];
+  const p = content.packages.find(x => x.id === l.packageId);
+
+  // Root-level so every stage (full + compact) animates off the same value.
+  document.documentElement.style.setProperty('--dirt', t.toFixed(4));
+  document.documentElement.style.setProperty('--wipe', t.toFixed(4));
+
+  document.querySelectorAll('.cond-range').forEach(r => {
+    if (+r.value !== v) r.value = v;
+    r.setAttribute('aria-valuetext', `${l.label} — ${p.tier}`);
+  });
+  document.querySelectorAll('[data-cond-level-out]').forEach(e => { e.textContent = l.label; });
+  document.querySelectorAll('[data-cond-tier-out]').forEach(e => {
+    e.textContent = `${p.tier} · ${currencyAU(p.priceFrom)}`;
+  });
+
+  conditionPick = touched ? { id: l.id, label: l.label, tier: p.tier } : null;
+  syncConditionChip();
+  refreshSmsLinks();
+  document.dispatchEvent(new CustomEvent('goldy:condition', { detail: { level: l, pkg: p } }));
+  return { level: l, pkg: p };
+}
+
+// Compact animated slider for the booking flows.
+function renderConditionInline(mount) {
   const c = content.condition;
   if (!mount || !c || !c.enabled) return;
+  const start = conditionValueFor(c.defaultIndex ?? 2);
   mount.innerHTML = `
-    <p class="cond-chips-label">How dirty is it? <span>so Gracie brings the right gear</span></p>
-    <div class="cond-chips" role="group" aria-label="How dirty is your car?">
-      ${c.levels.map(l => `<button type="button" class="cond-chip" data-cond-level="${l.id}" aria-pressed="false">${l.label}</button>`).join('')}
+    <div class="cond-inline">
+      <figure class="cond-stage cond-stage-sm">${conditionStageHTML(c)}</figure>
+      <div class="cond-inline-body">
+        <label class="cond-inline-label" for="${mount.id || 'ci'}-r">How dirty is it? <span>drag it — Gracie brings the right gear</span></label>
+        <input class="cond-range" id="${mount.id || 'ci'}-r" type="range" min="0" max="${CONDITION_MAX}" step="1" value="${start}">
+        <p class="cond-inline-read"><strong data-cond-level-out></strong> <span data-cond-tier-out></span></p>
+      </div>
     </div>`;
 }
 function syncConditionChips() {
-  document.querySelectorAll('[data-cond-chips]').forEach(mount => {
-    if (!mount.children.length) renderConditionChips(mount);
-    mount.querySelectorAll('[data-cond-level]').forEach(b => {
-      const on = !!conditionPick && b.dataset.condLevel === conditionPick.id;
-      b.classList.toggle('is-selected', on);
-      b.setAttribute('aria-pressed', String(on));
-    });
-  });
+  document.querySelectorAll('[data-cond-chips]').forEach(m => { if (!m.children.length) renderConditionInline(m); });
 }
-// One delegated handler covers every chip set, including ones rendered later.
-document.addEventListener('click', e => {
-  const btn = e.target.closest('[data-cond-level]');
-  if (!btn) return;
-  const c = content.condition;
-  const i = c.levels.findIndex(l => l.id === btn.dataset.condLevel);
-  if (i < 0) return;
-  const l = c.levels[i];
-  const p = content.packages.find(x => x.id === l.packageId);
-  conditionPick = { id: l.id, label: l.label, tier: p.tier };
-  // Drive the big slider to match so the two never disagree.
-  const range = document.getElementById('condRange');
-  if (range) {
-    const step = Number(range.max) / c.levels.length;
-    range.value = Math.round((i + 0.5) * step);
-    range.dispatchEvent(new Event('input', { bubbles: true }));
-  } else {
-    syncConditionChips(); syncConditionChip(); refreshSmsLinks();
-  }
-});
 
-// configurator.js re-renders its CTA on demand and fires this when it does.
-document.addEventListener('goldy:sms-refresh', () => { syncConditionChips(); refreshSmsLinks(); });
+// One delegated handler drives every slider on the page, however late it renders.
+document.addEventListener('input', e => {
+  if (e.target.classList && e.target.classList.contains('cond-range')) setCondition(+e.target.value, true);
+});
+// Track the finger instantly while dragging; ease only for taps and keyboard.
+['pointerdown', 'touchstart'].forEach(ev => document.addEventListener(ev, e => {
+  if (e.target.classList && e.target.classList.contains('cond-range')) document.documentElement.classList.add('cond-dragging');
+}, { passive: true }));
+['pointerup', 'pointercancel', 'touchend'].forEach(ev => document.addEventListener(ev, () => {
+  document.documentElement.classList.remove('cond-dragging');
+}, { passive: true }));
+
+// configurator.js re-renders its result on demand and fires this when it does.
+document.addEventListener('goldy:sms-refresh', () => {
+  syncConditionChips();
+  // A freshly-rendered copy must adopt the current position, not its default.
+  const any = document.querySelector('.cond-range');
+  if (any) setCondition(+any.value, !!conditionPick);
+  refreshSmsLinks();
+});
 
 // ============================================================
 // 0. CONTENT RENDER — populate everything from content.js
@@ -616,13 +673,7 @@ function renderCondition() {
   const levels = c.levels;
   const last = levels.length - 1;
   const START = Math.min(c.defaultIndex == null ? Math.floor(levels.length / 2) : c.defaultIndex, last);
-  const pkgOf = i => content.packages.find(p => p.id === levels[i].packageId);
-
-  // Continuous 0–100 track so the grime builds smoothly under the finger; the
-  // five named levels are bands derived from that value.
-  const MAXV = 100;
-  const bandOf = v => Math.min(last, Math.floor(v / (MAXV / levels.length)));
-  const startV = Math.round((START + 0.5) * (MAXV / levels.length));
+  const startV = conditionValueFor(START);
 
   mount.innerHTML = `
     <div class="section-head">
@@ -632,21 +683,9 @@ function renderCondition() {
     </div>
     <div class="cond-panel" id="condPanel" data-reveal>
       <div class="cond-visual">
-        <figure class="cond-stage" id="condStage">
-          <img class="cond-base" src="${c.photoClean.src}" alt="${c.photoClean.alt}" loading="lazy" decoding="async">
-          <span class="cond-l cond-floor" aria-hidden="true"><img src="${c.photoDirty ? c.photoDirty.src : 'assets/condition/dirty.jpg'}" alt="" loading="lazy" decoding="async"></span>
-          <span class="cond-l cond-shine" aria-hidden="true"></span>
-          <span class="cond-l cond-dust"  aria-hidden="true"></span>
-          <span class="cond-l cond-grime" aria-hidden="true"></span>
-          <span class="cond-l cond-hair"  aria-hidden="true"></span>
-          <span class="cond-l cond-grit"  aria-hidden="true"></span>
-          <span class="cond-l cond-bits"  aria-hidden="true"></span>
-          <span class="cond-l cond-trash" aria-hidden="true"></span>
-          <span class="cond-l cond-grain" aria-hidden="true"></span>
-          <span class="cond-l cond-vig"   aria-hidden="true"></span>
-        </figure>
+        <figure class="cond-stage" id="condStage">${conditionStageHTML(c)}</figure>
         <label class="cond-label" for="condRange">${c.sliderLabel}</label>
-        <input class="cond-range" id="condRange" type="range" min="0" max="${MAXV}" step="1"
+        <input class="cond-range" id="condRange" type="range" min="0" max="${CONDITION_MAX}" step="1"
                value="${startV}" aria-valuetext="${levels[START].label}">
         <div class="cond-ends" aria-hidden="true">
           <span>${levels[0].label}</span><span>${levels[last].label}</span>
@@ -654,7 +693,7 @@ function renderCondition() {
         <p class="cond-photo-note">${c.photoNote}</p>
       </div>
       <div class="cond-readout">
-        <div class="cond-level" id="condLevel"></div>
+        <div class="cond-level" data-cond-level-out></div>
         <p class="cond-blurb" id="condBlurb"></p>
         <div class="cond-suggest" id="condSuggest"></div>
         <div class="cond-ctas">
@@ -666,72 +705,46 @@ function renderCondition() {
     </div>
   `;
 
-  const panel = $('#condPanel');
   const stage = $('#condStage');
   const range = $('#condRange');
-  const smsEl = $('#condSms');
-  let touched = false;
-  let lastBand = -1;
 
-  function sync(v) {
-    const t = v / MAXV;                       // 0..1 continuous
-    const i = bandOf(v);
-    const l = levels[i], p = pkgOf(i);
-
-    // Two curves: `dirt` drives the grime layers (eased so the rough end
-    // ramps hardest), `wipe` stays linear for the track fill.
-    panel.style.setProperty('--wipe', t);
-    panel.style.setProperty('--dirt', t.toFixed(4));  // linear: every layer is linear in --dirt, so the five steps land evenly
-
-    if (i !== lastBand) {                     // text only changes on band change
-      lastBand = i;
-      $('#condLevel').textContent = l.label;
-      $('#condBlurb').textContent = l.blurb;
-      $('#condSuggest').innerHTML = `
-        <span class="cond-suggest-label">Probably</span>
-        <span class="cond-suggest-tier">${p.tier}</span>
-        <span class="cond-suggest-price">${currencyAU(p.priceFrom)}<small>from</small></span>`;
-      range.setAttribute('aria-valuetext', `${l.label} — ${p.tier}`);
-    }
-    // The slider's own CTA always states the current position.
-    smsEl.href = `${content.booking.smsHref}?&body=${encodeURIComponent(
+  // The big readout carries copy the compact copies don't, so it listens for
+  // the shared update rather than owning the state.
+  document.addEventListener('goldy:condition', e => {
+    const { level: l, pkg: p } = e.detail;
+    const blurb = $('#condBlurb'); if (blurb) blurb.textContent = l.blurb;
+    const sug = $('#condSuggest');
+    if (sug) sug.innerHTML = `
+      <span class="cond-suggest-label">Probably</span>
+      <span class="cond-suggest-tier">${p.tier}</span>
+      <span class="cond-suggest-price">${currencyAU(p.priceFrom)}<small>from</small></span>`;
+    const sms = $('#condSms');
+    if (sms) sms.href = `${content.booking.smsHref}?&body=${encodeURIComponent(
       `Hi Gracie! ${c.smsIntro}: ${l.label}. Looks like ${p.tier} ` +
-      `(${currencyAU(p.priceFrom)} from). My name: , Suburb: , Vehicle: `
-    )}`;
-    conditionPick = touched ? { id: l.id, label: l.label, tier: p.tier } : null;
-    syncConditionChip();
-    syncConditionChips();
-    refreshSmsLinks();   // carry the pick into every other booking link
-  }
+      `(${currencyAU(p.priceFrom)} from). My name: , Suburb: , Vehicle: `)}`;
+  });
 
-  range.addEventListener('input', () => { touched = true; sync(+range.value); });
-
-  // Track the finger instantly while dragging; ease only for keyboard/taps.
-  const dragOn  = () => panel.classList.add('is-dragging');
-  const dragOff = () => panel.classList.remove('is-dragging');
-  ['pointerdown', 'touchstart'].forEach(ev => range.addEventListener(ev, dragOn, { passive: true }));
-  ['pointerup', 'pointercancel', 'touchend', 'blur'].forEach(ev => range.addEventListener(ev, dragOff, { passive: true }));
-
-  // Drag straight on the photo — DESKTOP ONLY. On touch this would need
+  // Drag straight on the photo - desktop only. On touch this needs
   // touch-action:none, which would swallow vertical page scroll.
   if (!NO_HOVER) {
     let dragging = false;
     const setFromX = e => {
       const r = stage.getBoundingClientRect();
-      const v = Math.round(Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * MAXV);
-      if (v !== +range.value) { range.value = v; touched = true; sync(v); }
+      const v = Math.round(Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * CONDITION_MAX);
+      if (v !== +range.value) setCondition(v, true);
     };
     stage.addEventListener('pointerdown', e => {
-      dragging = true; dragOn(); stage.setPointerCapture(e.pointerId); setFromX(e);
+      dragging = true; document.documentElement.classList.add('cond-dragging');
+      stage.setPointerCapture(e.pointerId); setFromX(e);
     });
     stage.addEventListener('pointermove', e => { if (dragging) setFromX(e); });
     ['pointerup', 'pointercancel'].forEach(ev => stage.addEventListener(ev, e => {
-      dragging = false; dragOff();
+      dragging = false; document.documentElement.classList.remove('cond-dragging');
       if (stage.hasPointerCapture(e.pointerId)) stage.releasePointerCapture(e.pointerId);
     }));
   }
 
-  sync(startV);   // touched === false, so conditionPick stays null
+  setCondition(startV, false);   // untouched: conditionPick stays null
 }
 
 // Mirrors the chosen condition into the contact form so the visitor can see

@@ -6,6 +6,13 @@
 
 /* -------- TOKENS -------- */
 :root {
+  --wipe: 0.5;
+  --dirt: 0.5;
+  --thumb: 34px;
+  /* A range thumb's centre travels from thumb/2 to width-thumb/2, so the track
+     fill has to use the same geometry or it drifts ~17px at the ends. Defined
+     at root because the slider is rendered in several places on the page. */
+  --wipe-x: calc(var(--wipe) * (100% - var(--thumb)) + var(--thumb) / 2);
   /* Surface */
   --bg-deep:        #07090F;
   --bg-card:        #0E1219;
@@ -2132,12 +2139,6 @@ body.has-cursor .cursor-glow { opacity: 1; }
 }
 
 .cond-panel {
-  --wipe: 0.5;
-  --dirt: 0.5;
-  --thumb: 34px;
-  /* A range thumb's centre travels from thumb/2 to width-thumb/2, so the
-     seam has to use the same geometry or it drifts ~17px at the ends. */
-  --wipe-x: calc(var(--wipe) * (100% - var(--thumb)) + var(--thumb) / 2);
 
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2149,10 +2150,10 @@ body.has-cursor .cursor-glow { opacity: 1; }
   background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-elev) 100%);
   border: 1px solid var(--gold-line);
   border-radius: var(--r-lg);
-  transition: --wipe 120ms var(--ease-out), --dirt 120ms var(--ease-out);
 }
 /* While a finger/mouse is down: track instantly, no rubber-banding. */
-.cond-panel.is-dragging { transition: none; }
+.cond-dragging .cond-stage .cond-l,
+.cond-dragging .cond-stage .cond-base { transition: none !important; }
 
 .cond-visual { min-width: 0; }
 .cond-stage {
@@ -2408,3 +2409,38 @@ body.has-cursor .cursor-glow { opacity: 1; }
 }
 @media (hover: hover) { .cond-chip:hover { border-color: var(--gold-line); } }
 @media (max-width: 640px) { .cond-chip { flex: 1 1 auto; text-align: center; } }
+
+/* ---- Compact condition slider, inline in the booking flows -----------------
+   Same layered stage as the full one in #condition, at a size that fits beside
+   a quote. Every instance reads --dirt off :root, so they animate together. */
+.cond-stage .cond-l,
+.cond-stage .cond-base { transition: opacity 120ms var(--ease-out), filter 120ms var(--ease-out); }
+
+.cond-inline {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: 1rem;
+  align-items: center;
+  margin: 1.1rem 0 0.4rem;
+  padding: 0.9rem;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--gold-line);
+  border-radius: var(--r);
+}
+.cond-stage-sm { aspect-ratio: 3 / 4; border-radius: var(--r-sm); }
+.cond-inline-body { min-width: 0; }
+.cond-inline-label {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.1rem;
+}
+.cond-inline-label span { display: block; font-weight: 400; font-size: 0.76rem; color: var(--text-muted); }
+.cond-inline .cond-range { height: 44px; }
+.cond-inline-read { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.1rem; }
+.cond-inline-read strong { color: var(--gold); font-family: var(--font-display); font-size: 1rem; }
+
+@media (max-width: 520px) {
+  .cond-inline { grid-template-columns: 104px minmax(0, 1fr); gap: 0.8rem; padding: 0.75rem; }
+}
