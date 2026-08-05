@@ -239,6 +239,11 @@ export const content = Object.freeze({
     title: "How rough is it, honestly?",
     intro: "Drag it to whatever's closest to your car right now. Gracie would rather know up front — it means the price and the time she blocks out are right the first go.",
     sliderLabel: "Drag to show how dirty yours is",
+    // Gracie asked for this to sit above the readout copy, so the offer to just
+    // text her photos lands before anyone worries about picking the wrong one.
+    unsureNote: "Not sure which one yours is? Send a couple of photos through to the number below and Gracie will tell you.",
+    // Shown beside the estimate so the uplift is never a surprise at the door.
+    upliftLabel: "condition surcharge",
     defaultIndex: 2,
     photoClean: {
       src: "assets/condition/clean.jpg",
@@ -250,11 +255,11 @@ export const content = Object.freeze({
     secondaryCtaLabel: "Or use the form",
     smsIntro: "Condition check from the site",
     levels: [
-      { id: "clean", label: "Pretty clean",    blurb: "Washed recently, nothing on the floor. You just want it sharp again.",            packageId: "silver",  dirt: 0.00 },
-      { id: "dusty", label: "A bit dusty",     blurb: "Beach sand in the mats, dust on the dash, a couple of coffee rings. Normal life.", packageId: "silver",  dirt: 0.22 },
-      { id: "lived", label: "Lived in",        blurb: "Kids, dogs, work gear. Marks in the trim and the carpet needs more than a vacuum.", packageId: "gold",    dirt: 0.50 },
-      { id: "rough", label: "Genuinely rough", blurb: "Months of neglect. Stains, hair, grime in every seam. It needs a full reset.",     packageId: "gold",    dirt: 0.78 },
-      { id: "feral", label: "Don't judge me",  blurb: "You've been avoiding looking at it. Gracie's seen worse — bring it on.",           packageId: "diamond", dirt: 1.00 }
+      { id: "clean", label: "Pretty clean",   blurb: "Washed recently, nothing on the floor. You just want it sharp again.",             packageId: "silver",  dirt: 0.00, uplift: 0.00 },
+      { id: "dusty", label: "Little dusty",   blurb: "Beach sand in the mats, dust on the dash, a couple of coffee rings. Normal life.",  packageId: "silver",  dirt: 0.22, uplift: 0.15 },
+      { id: "lived", label: "Lived in",       blurb: "Kids, dogs, work gear. Marks in the trim and the carpet needs more than a vacuum.", packageId: "gold",    dirt: 0.50, uplift: 0.20 },
+      { id: "rough", label: "Dirty",          blurb: "Months of neglect. Stains, hair, grime in every seam. It needs a full reset.",      packageId: "gold",    dirt: 0.78, uplift: 0.25 },
+      { id: "feral", label: "Don't judge me", blurb: "You've been avoiding looking at it. Gracie's seen worse — bring it on.",            packageId: "diamond", dirt: 1.00, uplift: 0.35 }
     ]
   },
 

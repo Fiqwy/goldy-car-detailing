@@ -26,7 +26,11 @@ let conditionPick = null;
 const SMS_FILL_INS = 'My name: , Suburb: , Vehicle: ';
 
 function conditionSuffix() {
-  return conditionPick ? `Condition: ${conditionPick.label} (suggested ${conditionPick.tier}).` : '';
+  if (!conditionPick) return '';
+  // Carry the surcharge the visitor was shown, so the number Gracie reads in the
+  // text is the same number that was on their screen. Level 1 has no uplift.
+  const s = conditionPick.upliftPct ? ` +${conditionPick.upliftPct}% for condition.` : '';
+  return `Condition: ${conditionPick.label}.${s}`;
 }
 // A link can override the blanks via data-sms-fill when it already knows some of
 // them (the price builder asks the vehicle up front, so it never re-asks).
@@ -91,15 +95,28 @@ function setCondition(v, touched = true) {
     if (+r.value !== v) r.value = v;
     r.setAttribute('aria-valuetext', `${l.label} — ${p.tier}`);
   });
+  // Gracie's condition surcharge. Level 1 is the advertised package price, so
+  // its uplift is 0. Rounded to the nearest $5 — nobody quotes to the cent.
+  const uplift = l.uplift || 0;
+  const estimate = Math.round((p.priceFrom * (1 + uplift)) / 5) * 5;
+  const upliftPct = Math.round(uplift * 100);
+
   document.querySelectorAll('[data-cond-level-out]').forEach(e => { e.textContent = l.label; });
   document.querySelectorAll('[data-cond-tier-out]').forEach(e => {
-    e.textContent = `${p.tier} · ${currencyAU(p.priceFrom)}`;
+    const ctx = e.closest('[data-cond-base-price]');
+    const baseP = ctx ? Number(ctx.dataset.condBasePrice) : p.priceFrom;
+    const tier  = ctx ? (ctx.dataset.condBaseTier || p.tier) : p.tier;
+    const est   = Math.round((baseP * (1 + uplift)) / 5) * 5;
+    e.textContent = uplift
+      ? `${tier} · from ${currencyAU(est)} (+${upliftPct}% ${content.condition.upliftLabel})`
+      : `${tier} · from ${currencyAU(est)}`;
   });
 
-  conditionPick = touched ? { id: l.id, label: l.label, tier: p.tier } : null;
+  conditionPick = touched ? { id: l.id, label: l.label, tier: p.tier, upliftPct, estimate } : null;
   syncConditionChip();
   refreshSmsLinks();
-  document.dispatchEvent(new CustomEvent('goldy:condition', { detail: { level: l, pkg: p } }));
+  // estimate/upliftPct ride along so every readout quotes ONE number.
+  document.dispatchEvent(new CustomEvent('goldy:condition', { detail: { level: l, pkg: p, estimate, upliftPct } }));
   return { level: l, pkg: p };
 }
 
@@ -355,7 +372,7 @@ function renderCustomBuilder() {
           <a href="#" class="btn btn-primary" id="buildBook">Book this build <span class="arrow">→</span></a>
           <a href="tel:+61427798045" class="btn btn-ghost">Call or text · 0427 798 045</a>
         </div>
-        <div data-cond-chips></div>
+        <div data-cond-chips id="buildCond"></div>
         <p class="cfg-foot">Prices are per service. Gracie confirms the final total for your vehicle.</p>
       </div>
     </div>
@@ -383,6 +400,8 @@ function renderCustomBuilder() {
     const t = total();
     totalEl.textContent = currencyAU(t);
     bookEl.dataset.smsBody = buildSmsBody();
+    const cm = $('#buildCond');
+    if (cm) { cm.dataset.condBasePrice = String(t); cm.dataset.condBaseTier = 'Your build'; }
     refreshSmsLinks();
     let msg;
     if (t <= BASE_PRICE) msg = `That's the ${BASE_NAME} package. Add anything below and watch it climb.`;
@@ -693,6 +712,7 @@ function renderCondition() {
         <p class="cond-photo-note">${c.photoNote}</p>
       </div>
       <div class="cond-readout">
+        ${c.unsureNote ? `<p class="cond-unsure">${c.unsureNote}</p>` : ''}
         <div class="cond-level" data-cond-level-out></div>
         <p class="cond-blurb" id="condBlurb"></p>
         <div class="cond-suggest" id="condSuggest"></div>
@@ -711,17 +731,19 @@ function renderCondition() {
   // The big readout carries copy the compact copies don't, so it listens for
   // the shared update rather than owning the state.
   document.addEventListener('goldy:condition', e => {
-    const { level: l, pkg: p } = e.detail;
+    const { level: l, pkg: p, estimate, upliftPct } = e.detail;
     const blurb = $('#condBlurb'); if (blurb) blurb.textContent = l.blurb;
     const sug = $('#condSuggest');
     if (sug) sug.innerHTML = `
       <span class="cond-suggest-label">Probably</span>
       <span class="cond-suggest-tier">${p.tier}</span>
-      <span class="cond-suggest-price">${currencyAU(p.priceFrom)}<small>from</small></span>`;
+      <span class="cond-suggest-price">${currencyAU(estimate)}<small>from</small></span>
+      ${upliftPct ? `<span class="cond-suggest-uplift">includes +${upliftPct}% ${c.upliftLabel}</span>` : ''}`;
     const sms = $('#condSms');
     if (sms) sms.href = `${content.booking.smsHref}?&body=${encodeURIComponent(
       `Hi Gracie! ${c.smsIntro}: ${l.label}. Looks like ${p.tier} ` +
-      `(${currencyAU(p.priceFrom)} from). My name: , Suburb: , Vehicle: `)}`;
+      `(roughly ${currencyAU(estimate)}${upliftPct ? `, incl. +${upliftPct}% for condition` : ''}). ` +
+      `My name: , Suburb: , Vehicle: `)}`;
   });
 
   // Drag straight on the photo - desktop only. On touch this needs

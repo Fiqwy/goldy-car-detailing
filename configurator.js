@@ -122,7 +122,7 @@ function renderResult(content, state) {
       <summary>What's included</summary>
       <ul class="cfg-includes">${includesList}</ul>
     </details>
-    <div data-cond-chips></div>
+    <div data-cond-chips data-cond-base-price="${price}" data-cond-base-tier="${pkg.tier}"></div>
     <div class="hero-ctas cfg-ctas">
       <a href="${smsHref}" data-sms-body="${attr(smsBody)}" data-sms-fill="${attr(smsFill)}" class="btn btn-primary">Text my booking <span class="arrow">→</span></a>
       <a href="${TEL}" class="btn btn-ghost">Call · ${PHONE}</a>
