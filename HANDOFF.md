@@ -79,7 +79,33 @@ Hero (autoplay video) · Trust strip · Maintenance plan · Why Goldy · Price b
 4. **A proper founder bio** — the current one was written for her, not by her.
 5. **ABN** for the footer.
 6. **Condition surcharge (live 2026-08-05).** Gracie's ladder is in `content.condition.levels[].uplift`: Pretty clean +0%, Little dusty +15%, Lived in +20%, Dirty +25%, Don't judge me +35%. It is applied to **the package the visitor actually chose** (via `data-cond-base-price` on the slider mount), not to the level's own suggestion — otherwise picking "Bring it back" then dragging to the dirtiest level silently re-quoted them a Show-ready price. Estimates round to the nearest $5 and the "this isn't a quote" disclaimer stays on the page.
-7. **Replacement slider photos.** Gracie is shooting a proper 5-stage set (one car, same angle, progressively dirtier) to replace the procedural grime. When they land, drop them in `assets/condition/` and swap the layer stack in `conditionStageHTML()` for a simple cross-fade between the five real frames — that will beat anything drawn.
+7. **⭐ NEXT JOB — replace the drawn grime with Gracie's real 5-stage photo.**
+   Nicholas has a single wide image: **one Mazda 3 interior, same angle, in five vertical panels, progressively dirtier** (clean → light dust → dirt on the floor → heavy → mud everywhere). It is the correct, honest replacement for every procedural layer.
+
+   **It is not in the repo yet** — it was pasted into chat, which does not write a file to disk. Get the actual file saved somewhere local first (drag it into the project folder in VS Code, or save to `~/Desktop`), then:
+
+   1. Split the wide image into 5 equal-width panels, left to right:
+      ```bash
+      W=$(sips -g pixelWidth src.jpg | awk '/pixelWidth/{print $2}')
+      H=$(sips -g pixelHeight src.jpg | awk '/pixelHeight/{print $2}')
+      for i in 0 1 2 3 4; do
+        ffmpeg -nostdin -y -i src.jpg -vf "crop=$((W/5)):$H:$((W/5*i)):0,scale=-2:1100" \
+          -q:v 6 -frames:v 1 -update 1 "assets/condition/stage-$((i+1)).jpg"
+      done
+      ```
+      Target under ~250KB each (page weight is a standing gate).
+   2. In `script.js`, replace the whole layer stack inside `conditionStageHTML()` with the five frames — `stage-1.jpg` as the base `<img class="cond-base">`, then `stage-2..5` as `<img class="cond-frame" data-frame="2..5">`.
+   3. In `styles.css`, delete the procedural layers (`.cond-floor`, `.cond-dust`, `.cond-grime`, `.cond-hair`, `.cond-grit`, `.cond-bits`, `.cond-trash`, `.cond-grain`, `.cond-vig`, `.cond-shine`) and their four SVGs, and cross-fade the frames instead — each simply fades in over the one below and stays, which gives a clean progressive reveal with no gaps:
+      ```css
+      .cond-frame { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+      .cond-frame[data-frame="2"] { opacity: clamp(0, calc(var(--dirt) / 0.25), 1); }
+      .cond-frame[data-frame="3"] { opacity: clamp(0, calc((var(--dirt) - 0.25) / 0.25), 1); }
+      .cond-frame[data-frame="4"] { opacity: clamp(0, calc((var(--dirt) - 0.50) / 0.25), 1); }
+      .cond-frame[data-frame="5"] { opacity: clamp(0, calc((var(--dirt) - 0.75) / 0.25), 1); }
+      ```
+   4. Set `.cond-stage`'s `aspect-ratio` to match the panel shape (each panel is tall/portrait, roughly 3:4 — measure it).
+   5. Update `content.condition.photoNote` — it currently describes grime being "drawn on as you slide", which stops being true.
+   6. Re-run the mobile gate and check all four slider instances (the section plus the three inline copies) still animate together.
 8. **A photo of a genuinely messy car interior.** The condition slider currently layers procedural dust, pet hair, grit and ground-in grime over a clean photo, plus the real dirty carpet blended into the floor. It reads as a dusty, neglected car — but it cannot show actual rubbish (cups, wrappers, kids' stuff), because drawn objects read as clipart at this size and the project doesn't ship fake-looking content. Gracie starts every job on a messy car, so one honest 'before' shot from the same tailgate angle would let the slider cross-fade to real mess and finish this feature properly.
 9. **A real before/after pair** (same vehicle, same angle, dirty then clean) would unlock a genuine before/after feature. The two interior photos used by the condition slider are a reference scale, not a matched pair.
 
