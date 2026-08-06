@@ -246,10 +246,10 @@ export const content = Object.freeze({
     upliftLabel: "condition surcharge",
     defaultIndex: 2,
     photoClean: {
-      src: "assets/condition/clean.jpg",
+      src: "assets/condition/stage-1.jpg",
       alt: "Car interior used as the reference scale — drag the slider to show how dirty yours is"
     },
-    photoNote: "A reference scale for your car, not a before-and-after of a job. The grime is drawn on as you slide so you can dial in roughly how yours looks.",
+    photoNote: "A reference scale for your car, not a before-and-after of a job. It's the one interior shown at five levels of grime, so you can drag to whichever is closest to yours.",
     disclaimer: "This isn't a quote. It just tells Gracie what she's walking into.",
     ctaLabel: "Text Gracie this",
     secondaryCtaLabel: "Or use the form",

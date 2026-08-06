@@ -2152,14 +2152,14 @@ body.has-cursor .cursor-glow { opacity: 1; }
   border-radius: var(--r-lg);
 }
 /* While a finger/mouse is down: track instantly, no rubber-banding. */
-.cond-dragging .cond-stage .cond-l,
+.cond-dragging .cond-stage .cond-frame,
 .cond-dragging .cond-stage .cond-base { transition: none !important; }
 
 .cond-visual { min-width: 0; }
 .cond-stage {
   position: relative;
   margin: 0;
-  aspect-ratio: 3 / 4;          /* matches the exported photo pair exactly */
+  aspect-ratio: 3 / 5;          /* matches the exported stage-N.jpg frames exactly */
   border-radius: var(--r);
   overflow: hidden;
   isolation: isolate;
@@ -2167,105 +2167,29 @@ body.has-cursor .cursor-glow { opacity: 1; }
   border: 1px solid var(--line);
 }
 /* ---- The grime engine ----------------------------------------------------
-   ONE real photo underneath; every bit of dirt above it is drawn by CSS and
-   driven by --dirt, so it builds and lifts continuously as the handle moves
-   instead of cutting between two stills. Layers are plain opacity/blend work
-   (compositor-only) apart from one cheap filter on the base image. */
-.cond-base {
+   Five photographic frames of the SAME Mazda interior, same angle, same light,
+   each one dirtier than the last. --dirt cross-fades them: each frame fades in
+   over the one below and STAYS, so the grime builds continuously as the handle
+   moves instead of cutting between stills, and there are no gaps between
+   thresholds. Opacity is the only animated property, so this is compositor-only
+   and cheap on mobile — it replaced a ten-layer stack of drawn-on dust, hair,
+   grit and rubbish, which is why all of those rules are gone.
+   Still a reference scale, NOT a before/after of Gracie's work. */
+.cond-base,
+.cond-frame {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
-  z-index: 0;
-  filter:
-    saturate(calc(1 - var(--dirt) * 0.24))
-    brightness(calc(1 - var(--dirt) * 0.09))
-    contrast(calc(1 + var(--dirt) * 0.02));
+  display: block;
 }
-.cond-l { position: absolute; inset: 0; pointer-events: none; }
-
-/* Real photographic grime. The dirty reference photo shares this framing, and
-   its lower ~40% (the flat cargo floor with the two seat rails) registers
-   closely with the clean one — so we fade THAT region in and mask everything
-   above it, giving genuine ground-in stains instead of a painted-on wash. */
-.cond-floor {
-  z-index: 1;
-  opacity: clamp(0, calc((var(--dirt) - 0.08) * 1.25), 0.92);
-  -webkit-mask-image: linear-gradient(180deg, transparent 52%, rgba(0,0,0,0.35) 66%, #000 86%);
-  mask-image: linear-gradient(180deg, transparent 52%, rgba(0,0,0,0.35) 66%, #000 86%);
-}
-.cond-floor img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-/* ---- The mess itself. Each layer crosses its threshold at a different point
-   so grot accumulates as you drag rather than switching on all at once:
-   dust → hair → grit → leaves → rubbish. All are static images whose only
-   animated property is opacity, so this stays compositor-cheap on mobile. ---- */
-.cond-hair, .cond-grit, .cond-bits, .cond-trash {
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
-}
-/* Golden-retriever hair — Gracie runs two, and pet hair removal is a paid
-   service here, so it's the first mess a real owner would recognise. */
-.cond-hair  { z-index: 6; opacity: clamp(0, calc((var(--dirt) - 0.18) * 1.7), 0.9);  background-image: url("assets/condition/hair.svg"); }
-/* Sand, crumbs and ground-in grit. */
-.cond-grit  { z-index: 7; opacity: clamp(0, calc((var(--dirt) - 0.28) * 1.8), 0.95); background-image: url("assets/condition/grit.svg"); }
-/* Dry leaves, grass and twigs walked in off a driveway. */
-.cond-bits  { z-index: 8; opacity: clamp(0, calc((var(--dirt) - 0.46) * 2.2), 0.95); background-image: url("assets/condition/bits.svg"); }
-/* Actual rubbish — wrappers, a receipt, a cup lid, a straw. Last to appear,
-   because a car only reaches this once it has genuinely been let go. */
-.cond-trash { z-index: 9; opacity: clamp(0, calc((var(--dirt) - 0.42) * 1.9), 1);    background-image: url("assets/condition/trash.svg"); }
-
-/* Fresh-off-the-detail gloss — only present at the clean end, so sliding back
-   toward "Pretty clean" visibly lifts the car rather than just removing dirt. */
-.cond-shine {
-  z-index: 2;
-  opacity: calc((1 - var(--dirt)) * 0.55);
-  mix-blend-mode: screen;
-  background:
-    linear-gradient(115deg, transparent 34%, rgba(255,252,240,0.30) 47%, rgba(255,255,255,0.06) 55%, transparent 66%),
-    radial-gradient(70% 44% at 26% 16%, rgba(255,250,235,0.26), transparent 70%);
-}
-
-/* Warm dust haze — the first thing to appear, settles over everything. */
-.cond-dust {
-  z-index: 3;
-  opacity: calc(var(--dirt) * 0.18);
-  background:
-    radial-gradient(120% 88% at 50% 8%, rgba(146,126,90,0) 30%, rgba(74,62,44,0.78) 100%),
-    linear-gradient(180deg, rgba(150,130,96,0.30) 0%, rgba(72,60,42,0.44) 100%);
-}
-
-/* Blotchy ground-in grime — coarse turbulence, multiplied so it darkens into
-   the shadows the way real dirt collects. Scales up slightly as it builds. */
-.cond-grime {
-  z-index: 4;
-  opacity: calc(var(--dirt) * 0.85);
-  mix-blend-mode: multiply;
-  transform: scale(calc(1 + var(--dirt) * 0.04));
-  background-size: cover;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='560'%3E%3Cfilter id='g' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.018 0.028' numOctaves='4' seed='7'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.42 0 0 0 0 0.35 0 0 0 0 0.24 0 0 0 -3.2 1.9'/%3E%3C/filter%3E%3Crect width='420' height='560' filter='url(%23g)'/%3E%3C/svg%3E");
-  -webkit-mask-image: linear-gradient(180deg, transparent 4%, rgba(0,0,0,0.22) 24%, rgba(0,0,0,0.72) 52%, #000 74%);
-  mask-image: linear-gradient(180deg, transparent 4%, rgba(0,0,0,0.22) 24%, rgba(0,0,0,0.72) 52%, #000 74%);
-}
-
-/* Fine dust/sand grain sitting on the surfaces. */
-.cond-grain {
-  z-index: 10;
-  opacity: calc(var(--dirt) * 0.55);
-  mix-blend-mode: soft-light;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='3' seed='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
-  -webkit-mask-image: linear-gradient(180deg, transparent 4%, rgba(0,0,0,0.22) 24%, rgba(0,0,0,0.72) 52%, #000 74%);
-  mask-image: linear-gradient(180deg, transparent 4%, rgba(0,0,0,0.22) 24%, rgba(0,0,0,0.72) 52%, #000 74%);
-}
-
-/* Edge grime — dirt always builds up worst around the edges and footwells. */
-.cond-vig {
-  z-index: 11;
-  opacity: calc(var(--dirt) * 0.34);
-  background:
-    radial-gradient(88% 70% at 50% 42%, transparent 42%, rgba(28,22,14,0.62) 100%),
-    linear-gradient(0deg, rgba(34,27,17,0.55) 0%, transparent 34%);
-}
+.cond-base  { z-index: 0; }
+.cond-frame { z-index: 1; pointer-events: none; }
+/* Each frame owns one quarter of the travel and is fully opaque by the end of
+   it, so frame N is solid before frame N+1 starts lifting. */
+.cond-frame[data-frame="2"] { opacity: clamp(0, calc(var(--dirt) / 0.25), 1); }
+.cond-frame[data-frame="3"] { opacity: clamp(0, calc((var(--dirt) - 0.25) / 0.25), 1); }
+.cond-frame[data-frame="4"] { opacity: clamp(0, calc((var(--dirt) - 0.50) / 0.25), 1); }
+.cond-frame[data-frame="5"] { opacity: clamp(0, calc((var(--dirt) - 0.75) / 0.25), 1); }
 
 .cond-label {
   display: block;
@@ -2366,6 +2290,14 @@ body.has-cursor .cursor-glow { opacity: 1; }
 @media (hover: hover) and (min-width: 1025px) {
   .cond-stage { cursor: ew-resize; }
 }
+/* The stage frames are 3:5 — portrait and tall. At a full half-width column the
+   image towers over the readout beside it and leaves a dead patch of panel. Cap
+   the visual column (stage, slider and note all share that width, so they stay
+   flush-aligned) and give the reclaimed space to the readout. */
+@media (min-width: 901px) {
+  .cond-panel { grid-template-columns: 0.86fr 1.14fr; }
+  .cond-visual { max-width: 372px; margin-inline-end: auto; }
+}
 @media (max-width: 900px) {
   .cond-panel { grid-template-columns: 1fr; }
 }
@@ -2413,8 +2345,7 @@ body.has-cursor .cursor-glow { opacity: 1; }
 /* ---- Compact condition slider, inline in the booking flows -----------------
    Same layered stage as the full one in #condition, at a size that fits beside
    a quote. Every instance reads --dirt off :root, so they animate together. */
-.cond-stage .cond-l,
-.cond-stage .cond-base { transition: opacity 120ms var(--ease-out), filter 120ms var(--ease-out); }
+.cond-stage .cond-frame { transition: opacity 120ms var(--ease-out); }
 
 .cond-inline {
   display: grid;
@@ -2427,7 +2358,7 @@ body.has-cursor .cursor-glow { opacity: 1; }
   border: 1px solid var(--gold-line);
   border-radius: var(--r);
 }
-.cond-stage-sm { aspect-ratio: 3 / 4; border-radius: var(--r-sm); }
+.cond-stage-sm { aspect-ratio: 3 / 5; border-radius: var(--r-sm); }
 .cond-inline-body { min-width: 0; }
 .cond-inline-label {
   display: block;

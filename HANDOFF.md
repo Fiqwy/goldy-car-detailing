@@ -79,35 +79,48 @@ Hero (autoplay video) · Trust strip · Maintenance plan · Why Goldy · Price b
 4. **A proper founder bio** — the current one was written for her, not by her.
 5. **ABN** for the footer.
 6. **Condition surcharge (live 2026-08-05).** Gracie's ladder is in `content.condition.levels[].uplift`: Pretty clean +0%, Little dusty +15%, Lived in +20%, Dirty +25%, Don't judge me +35%. It is applied to **the package the visitor actually chose** (via `data-cond-base-price` on the slider mount), not to the level's own suggestion — otherwise picking "Bring it back" then dragging to the dirtiest level silently re-quoted them a Show-ready price. Estimates round to the nearest $5 and the "this isn't a quote" disclaimer stays on the page.
-7. **⭐ NEXT JOB — replace the drawn grime with Gracie's real 5-stage photo.**
-   Nicholas has a single wide image: **one Mazda 3 interior, same angle, in five vertical panels, progressively dirtier** (clean → light dust → dirt on the floor → heavy → mud everywhere). It is the correct, honest replacement for every procedural layer.
+7. ~~**Replace the drawn grime with the real 5-stage photo.**~~ **DONE 2026-08-06.** The
+   condition slider is now photographic. Source is a single wide image — **one Mazda 3
+   interior, same angle, five vertical panels, progressively dirtier** (clean → light dust
+   → dirt on the floor → heavy → mud everywhere) — kept at
+   `assets/_source/condition-5panel.jpg` (1536×867, not served).
 
-   **It is not in the repo yet** — it was pasted into chat, which does not write a file to disk. Get the actual file saved somewhere local first (drag it into the project folder in VS Code, or save to `~/Desktop`), then:
+   Each panel is 307×867. That is far narrower than 3:4, so the panels were **re-cropped to
+   3:5**, anchored low to keep the steering wheel, console, seat and footwell in frame —
+   the parts that carry the dirt. Exported to `assets/condition/stage-1..5.jpg` at
+   614×1024, ~65-98KB each (452KB total). To regenerate:
+   ```bash
+   for i in 0 1 2 3 4; do
+     ffmpeg -nostdin -y -i assets/_source/condition-5panel.jpg \
+       -vf "crop=307:512:$((307*i)):266,scale=614:1024:flags=lanczos" \
+       -q:v 5 -frames:v 1 -update 1 "assets/condition/stage-$((i+1)).jpg"
+   done
+   ```
+   `conditionStageHTML()` now emits `stage-1.jpg` as `.cond-base` plus frames 2-5 as
+   `.cond-frame`, cross-faded by `--dirt` — each owns a quarter of the travel and is fully
+   opaque before the next lifts, so grime builds with no gaps. The ten procedural layers
+   (`.cond-floor`, `.cond-dust`, `.cond-grime`, `.cond-hair`, `.cond-grit`, `.cond-bits`,
+   `.cond-trash`, `.cond-grain`, `.cond-vig`, `.cond-shine`), their four SVGs and the old
+   `clean.jpg`/`dirty.jpg` are deleted. Net page weight +83KB.
 
-   1. Split the wide image into 5 equal-width panels, left to right:
-      ```bash
-      W=$(sips -g pixelWidth src.jpg | awk '/pixelWidth/{print $2}')
-      H=$(sips -g pixelHeight src.jpg | awk '/pixelHeight/{print $2}')
-      for i in 0 1 2 3 4; do
-        ffmpeg -nostdin -y -i src.jpg -vf "crop=$((W/5)):$H:$((W/5*i)):0,scale=-2:1100" \
-          -q:v 6 -frames:v 1 -update 1 "assets/condition/stage-$((i+1)).jpg"
-      done
-      ```
-      Target under ~250KB each (page weight is a standing gate).
-   2. In `script.js`, replace the whole layer stack inside `conditionStageHTML()` with the five frames — `stage-1.jpg` as the base `<img class="cond-base">`, then `stage-2..5` as `<img class="cond-frame" data-frame="2..5">`.
-   3. In `styles.css`, delete the procedural layers (`.cond-floor`, `.cond-dust`, `.cond-grime`, `.cond-hair`, `.cond-grit`, `.cond-bits`, `.cond-trash`, `.cond-grain`, `.cond-vig`, `.cond-shine`) and their four SVGs, and cross-fade the frames instead — each simply fades in over the one below and stays, which gives a clean progressive reveal with no gaps:
-      ```css
-      .cond-frame { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
-      .cond-frame[data-frame="2"] { opacity: clamp(0, calc(var(--dirt) / 0.25), 1); }
-      .cond-frame[data-frame="3"] { opacity: clamp(0, calc((var(--dirt) - 0.25) / 0.25), 1); }
-      .cond-frame[data-frame="4"] { opacity: clamp(0, calc((var(--dirt) - 0.50) / 0.25), 1); }
-      .cond-frame[data-frame="5"] { opacity: clamp(0, calc((var(--dirt) - 0.75) / 0.25), 1); }
-      ```
-   4. Set `.cond-stage`'s `aspect-ratio` to match the panel shape (each panel is tall/portrait, roughly 3:4 — measure it).
-   5. Update `content.condition.photoNote` — it currently describes grime being "drawn on as you slide", which stops being true.
-   6. Re-run the mobile gate and check all four slider instances (the section plus the three inline copies) still animate together.
-8. **A photo of a genuinely messy car interior.** The condition slider currently layers procedural dust, pet hair, grit and ground-in grime over a clean photo, plus the real dirty carpet blended into the floor. It reads as a dusty, neglected car — but it cannot show actual rubbish (cups, wrappers, kids' stuff), because drawn objects read as clipart at this size and the project doesn't ship fake-looking content. Gracie starts every job on a messy car, so one honest 'before' shot from the same tailgate angle would let the slider cross-fade to real mess and finish this feature properly.
-9. **A real before/after pair** (same vehicle, same angle, dirty then clean) would unlock a genuine before/after feature. The two interior photos used by the condition slider are a reference scale, not a matched pair.
+   **Layout moved with it.** 3:5 frames are tall, so a half-width image column towered over
+   the readout and left a dead patch of panel (visual 929px vs readout 392px). The slider,
+   its label and its end labels now live in `.cond-readout` beside the level and price they
+   drive; `.cond-visual` holds only the stage and its caption, capped at 372px and
+   left-aligned, with the grid at `0.86fr 1.14fr` above 900px. Column gap is now 178px and
+   the control sits next to its own readout. Mobile is one column and unaffected.
+
+   **If you want a different crop**, it is one line: `.cond-stage`/`.cond-stage-sm`
+   `aspect-ratio` plus the `crop=` height/offset above. 3:4 (`crop=307:409:…:343`) drops the
+   steering wheel; the full panel (`crop=307:867:…:0`) keeps the whole dash but renders as a
+   narrow column beside the copy on desktop.
+
+   ⚠️ **Honesty note.** The five panels are one interior shown at five levels of grime — a
+   reference scale, exactly as the procedural version was. `photoNote` says so. Do **not**
+   recaption it as a before/after of Gracie's work, and do not present the panels as five
+   separate jobs.
+8. **A real before/after pair** (same vehicle, same angle, dirty then clean) would unlock a
+   genuine before/after feature. The condition slider is a reference scale, not a matched pair.
 
 Search `content.js` for `CONFIRM` to find every one of these in place.
 

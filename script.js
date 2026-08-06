@@ -63,20 +63,17 @@ function conditionBand(v) {
 function conditionValueFor(i) {
   return Math.round((i + 0.5) * (CONDITION_MAX / content.condition.levels.length));
 }
-// The layered grime stack — one real photo plus the debris layers above it.
+// Five photographic frames of the SAME interior at the same angle, each one
+// dirtier than the last. --dirt cross-fades between them (see .cond-frame in
+// styles.css), which replaced the old drawn-on grime stack. Frames 2-5 are
+// decorative — the base image carries the alt text for the whole figure.
 function conditionStageHTML(c) {
+  const frames = [2, 3, 4, 5].map(n =>
+    `<img class="cond-frame" data-frame="${n}" src="assets/condition/stage-${n}.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async">`
+  ).join('\n    ');
   return `
     <img class="cond-base" src="${c.photoClean.src}" alt="${c.photoClean.alt}" loading="lazy" decoding="async">
-    <span class="cond-l cond-floor" aria-hidden="true"><img src="assets/condition/dirty.jpg" alt="" loading="lazy" decoding="async"></span>
-    <span class="cond-l cond-shine" aria-hidden="true"></span>
-    <span class="cond-l cond-dust"  aria-hidden="true"></span>
-    <span class="cond-l cond-grime" aria-hidden="true"></span>
-    <span class="cond-l cond-hair"  aria-hidden="true"></span>
-    <span class="cond-l cond-grit"  aria-hidden="true"></span>
-    <span class="cond-l cond-bits"  aria-hidden="true"></span>
-    <span class="cond-l cond-trash" aria-hidden="true"></span>
-    <span class="cond-l cond-grain" aria-hidden="true"></span>
-    <span class="cond-l cond-vig"   aria-hidden="true"></span>`;
+    ${frames}`;
 }
 
 // Single entry point. Everything that changes the condition calls this.
@@ -703,15 +700,19 @@ function renderCondition() {
     <div class="cond-panel" id="condPanel" data-reveal>
       <div class="cond-visual">
         <figure class="cond-stage" id="condStage">${conditionStageHTML(c)}</figure>
+        <p class="cond-photo-note">${c.photoNote}</p>
+      </div>
+      <!-- The slider lives beside the readout it drives, not under the photo: the
+           frames are portrait, so a half-width image column towers over the text
+           and leaves a dead patch of panel. This also puts the control, the level
+           it lands on and the price it implies in one column, in reading order. -->
+      <div class="cond-readout">
         <label class="cond-label" for="condRange">${c.sliderLabel}</label>
         <input class="cond-range" id="condRange" type="range" min="0" max="${CONDITION_MAX}" step="1"
                value="${startV}" aria-valuetext="${levels[START].label}">
         <div class="cond-ends" aria-hidden="true">
           <span>${levels[0].label}</span><span>${levels[last].label}</span>
         </div>
-        <p class="cond-photo-note">${c.photoNote}</p>
-      </div>
-      <div class="cond-readout">
         ${c.unsureNote ? `<p class="cond-unsure">${c.unsureNote}</p>` : ''}
         <div class="cond-level" data-cond-level-out></div>
         <p class="cond-blurb" id="condBlurb"></p>
