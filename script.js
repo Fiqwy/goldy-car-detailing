@@ -538,16 +538,73 @@ function renderGallery() {
   }
 }
 
+// Where a review was left, in words. Anything unrecognised falls back to no label
+// rather than printing the raw key at a customer.
+const TMT_SOURCES = {
+  google: 'Google review',
+  facebook: 'Facebook review',
+  instagram: 'Instagram',
+  direct: 'Sent to Gracie directly'
+};
+
+// "2026-03-14" -> "March 2026". A day-of-the-month on a review reads like a receipt,
+// and anything we can't parse is simply left out.
+function tmtWhen(iso) {
+  const m = /^(\d{4})-(\d{2})/.exec(String(iso || ''));
+  if (!m) return '';
+  const d = new Date(Number(m[1]), Number(m[2]) - 1, 1);
+  return isNaN(d) ? '' : d.toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
+}
+
+// Real reviews Gracie has pasted in through her content portal. Built with
+// createElement + textContent rather than an innerHTML template like the proof cards
+// below it: this is the one block on the site whose words come from outside this repo,
+// and text that can never be parsed as markup is a stronger guarantee than a server
+// that promises to have stripped it.
+function tmtQuoteCard(q) {
+  const card = document.createElement('article');
+  card.className = 'tmt tmt-quote';
+  card.setAttribute('data-reveal', '');
+
+  const quote = document.createElement('p');
+  quote.className = 'tmt-sub';
+  quote.textContent = `“${q.quote}”`;
+  card.appendChild(quote);
+
+  const author = document.createElement('div');
+  author.className = 'tmt-label';
+  author.textContent = q.author;
+  card.appendChild(author);
+
+  const meta = [TMT_SOURCES[q.source] || '', q.suburb || '', tmtWhen(q.date)].filter(Boolean);
+  if (meta.length) {
+    const line = document.createElement('p');
+    line.className = 'tmt-sub';
+    line.textContent = meta.join(' · ');
+    card.appendChild(line);
+  }
+  return card;
+}
+
 function renderTestimonials() {
   const t = content.testimonials;
-  if (!t || !t.proofPoints) return;
-  $('#tmtGrid').innerHTML = t.proofPoints.map(p => `
+  if (!t) return;
+  const grid = $('#tmtGrid');
+  const quotes = Array.isArray(t.quotes) ? t.quotes.filter(q => q && q.quote && q.author) : [];
+
+  if (quotes.length) {
+    // Real named reviews replace the proof points entirely — they were only ever
+    // standing in until Gracie had reviews to show.
+    grid.replaceChildren(...quotes.map(tmtQuoteCard));
+  } else if (t.proofPoints) {
+    grid.innerHTML = t.proofPoints.map(p => `
     <article class="tmt tmt-proof" data-reveal>
       <div class="tmt-metric">${p.metric}</div>
       <div class="tmt-label">${p.label}</div>
       <p class="tmt-sub">${p.sub}</p>
     </article>
   `).join('');
+  }
   // Update the section head if a custom headline shipped.
   const head = document.querySelector('.testimonials .section-head');
   if (!head) return;

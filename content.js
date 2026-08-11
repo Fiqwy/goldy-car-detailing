@@ -6,7 +6,24 @@
 // Every `// CONFIRM` still needs Gracie's final sign-off.
 // ============================================================
 
-export const content = Object.freeze({
+import { overrides } from './content.client.js';
+
+// Deep merge: objects merge key by key, everything else (including arrays) replaces
+// wholesale. An override key that is not present keeps the base value by construction.
+function deepMerge(base, patch) {
+  if (patch === undefined) return base;
+  if (patch === null || typeof patch !== 'object' || Array.isArray(patch)) return patch;
+  const out = Object.assign({}, base);
+  for (const key of Object.keys(patch)) {
+    const b = out[key];
+    out[key] = (b && typeof b === 'object' && !Array.isArray(b))
+      ? deepMerge(b, patch[key])
+      : patch[key];
+  }
+  return out;
+}
+
+const base = {
 
   brand: {
     name: "Goldy Car Detailing",
@@ -504,4 +521,6 @@ export const content = Object.freeze({
   theme: {
     // gold: "#E0B872",   // override here if Gracie's brand wants warmer/cooler
   }
-});
+};
+
+export const content = Object.freeze(deepMerge(base, overrides));
