@@ -174,9 +174,17 @@ function renderHero() {
   $('#heroEyebrow span:last-child').textContent = h.eyebrow;
 
   const title = $('#heroTitle');
-  title.innerHTML = h.headlineLines
+  // Source the two lines from the editable scalars when present (Content Studio),
+  // else fall back to the headlineLines array. Each line lands in a stable,
+  // selectable wrapper (.hero-line-1 / .hero-line-2) so the editor can target it.
+  // Appearance is unchanged: the .line class and the 2nd-line gold-grad stay put.
+  const headlineLines = [
+    h.headlineLine1 != null ? h.headlineLine1 : h.headlineLines[0],
+    h.headlineLine2 != null ? h.headlineLine2 : h.headlineLines[1]
+  ];
+  title.innerHTML = headlineLines
     .map((line, i) =>
-      `<span class="line${i === 1 ? ' gold-grad' : ''}">${splitWords(line)}</span>`
+      `<span class="line hero-line-${i + 1}${i === 1 ? ' gold-grad' : ''}">${splitWords(line)}</span>`
     ).join('');
 
   $('#heroSub').textContent = h.sub;

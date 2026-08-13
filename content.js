@@ -49,6 +49,11 @@ const base = {
       "Your driveway.",
       "Her standards."  // italic gold gradient on the second line
     ],
+    // Editable scalars for Content Studio (valid identifier keys). renderHero
+    // prefers these when present and falls back to headlineLines[0]/[1], so the
+    // array above still renders the base site if these were ever absent.
+    headlineLine1: "Your driveway.",
+    headlineLine2: "Her standards.",  // second line keeps the italic gold gradient via CSS
     sub: "Owner-operated mobile detailing across the Gold Coast — cars, 4WDs, bikes, vans, horsefloats. Real prices upfront, real photos on this page, no quote-back nonsense. Direct with Gracie.",
     primaryCta: { label: "Build my price · 60s", href: "#configurator" },
     maintenanceCta: { label: "Maintenance plans", href: "#maintenance" },
