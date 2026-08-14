@@ -133,6 +133,18 @@
         <div class="trust-row" id="trustRow"></div>
       </div>
     </section>
+
+    <!-- ============================================================
+         PROMO SLOT — filled by renderPromo() from content.promo, empty
+         and [hidden] whenever there's no live offer.
+         Deliberately a bare <div> in normal document flow, NOT a <section>:
+         every section carries padding-block: var(--gap-section), which would
+         leave a dead band of nothing between the trust strip and maintenance
+         on the 99% of days there is no promo running. Normal flow rather than
+         a fixed bar for the same reason it isn't sticky — a fixed band would
+         fight .nav (styles.css :192), which already owns the top of the screen.
+         ============================================================ -->
+    <div class="promo-slot" id="promoMount" hidden></div>
     <div class="divider" data-reveal></div>
 
     <!-- ============================================================

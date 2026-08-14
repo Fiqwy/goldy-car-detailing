@@ -194,6 +194,25 @@ const base = {
     }
   ],
 
+  // ONE promo at a time — a banner near the top of the page plus an optional
+  // was/now on the package it names. Off by default: renderPromo() draws nothing
+  // until enabled is true AND endDate hasn't passed, so the promo expires on the
+  // visitor's own clock and Gracie never needs a deploy to end a weekend special.
+  // The "was" price is deliberately NOT stored here — it's read from the package's
+  // own priceFrom, so putting her prices up can never leave a stale strike-through
+  // behind advertising a discount she isn't giving. The copy below is the template
+  // she sees pre-filled in her portal, not a live offer.
+  promo: {
+    enabled: false,
+    badgeLabel: "Save 20%",
+    headline: "20% off the Bring it back package",
+    sub: "This weekend only. Text Gracie to lock it in.",
+    packageId: "none",        // none | all | silver | gold | diamond | custom
+    percentOff: 0,            // 1–90. Used for "all", or when nowPrice is 0
+    nowPrice: 0,              // 0 = not set. Beats percentOff on a single package
+    endDate: ""               // "YYYY-MM-DD", inclusive, Brisbane. "" = runs until she switches it off
+  },
+
   // Recurring maintenance plan for her regulars (v6: dedicated section + hero CTA)
   maintenancePlan: {
     enabled: true,

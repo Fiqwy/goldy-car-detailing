@@ -725,6 +725,82 @@ section { padding-block: var(--gap-section); position: relative; }
   text-transform: uppercase;
   border-radius: 999px;
 }
+
+/* -------- PROMO SLOT --------
+   One offer at a time: a band under the trust strip, plus a was/now on the
+   package it names. Most days there is no promo, so the mount has to cost the
+   page exactly nothing — [hidden] is restated here because a display rule
+   arriving later would quietly beat the UA stylesheet's `hidden`. */
+.promo-slot[hidden] { display: none; }
+.promo-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem 1.2rem;
+  margin-block: clamp(1.6rem, 3vw, 2.6rem);
+  padding: 1.4rem 1.6rem;
+  background: linear-gradient(120deg, var(--gold-soft) 0%, rgba(224, 184, 114, 0.03) 100%);
+  border: 1px solid var(--gold-line);
+  border-radius: var(--r-lg);
+}
+/* Same pill recipe as .pkg-badge — it just isn't positioned, it sits in the row. */
+.promo-badge {
+  padding: 4px 10px;
+  background: linear-gradient(95deg, var(--gold-warm), var(--gold));
+  color: #1A1208;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: var(--r-pill);
+}
+/* min-width:0 so a long headline wraps inside the copy block instead of forcing
+   the flex row wider than the container. */
+.promo-copy { flex: 1 1 16rem; min-width: 0; }
+.promo-headline {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+  letter-spacing: -0.015em;
+}
+.promo-sub {
+  margin: 0.25rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+.promo-cta { margin-left: auto; }
+@media (max-width: 640px) {
+  .promo-cta { margin-left: 0; width: 100%; justify-content: center; }
+}
+/* The struck-out old price. Deliberately NOT styled like .pkg-price-num: that
+   one paints its glyphs with a clipped gold gradient, and a line-through drawn
+   across transparent text reads as a gold bar floating over nothing. */
+.pkg-price-was {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+/* Deeper gold than .pkg-badge so the two read as different things when the gold
+   card is wearing both. */
+.pkg-badge-promo {
+  background: linear-gradient(95deg, var(--gold), var(--gold-deep));
+  color: #120C04;
+  /* Gracie types this label. Truncating a runaway one is kinder than letting it
+     grow across the card and collide with "Most picked" in the other corner. */
+  max-width: 45%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* "Most picked" already owns the right corner on the gold card, so the promo
+   badge crosses to the left rather than stacking on top of it. */
+.pkg-badge-promo.is-second { right: auto; left: 1.6rem; }
+
 .pkg-tier {
   font-family: var(--font-display);
   font-weight: 800;

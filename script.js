@@ -320,6 +320,147 @@ function renderPackages() {
   `).join('');
 }
 
+// ---- The promo slot -------------------------------------------------------
+// ONE offer at a time: a band under the trust strip, and optionally a was/now on
+// the package it names. It has to expire on the VISITOR'S clock, not on a deploy
+// — a weekend special that's still advertised on Tuesday because nobody pushed a
+// commit is worse than never running one.
+
+// Brisbane is UTC+10 all year (Queensland has never kept DST), so the local date
+// is a fixed offset away and needs no timezone database. The comparison is a
+// string one on YYYY-MM-DD, which sorts correctly by construction, and it's `>`
+// not `>=` so the end day itself still counts — "ends Sunday" means Sunday.
+// Anything we can't parse is treated as already over: a typo in a date should
+// silently end the promo, never leave it running forever.
+function promoExpired(endDate) {
+  if (!endDate) return false;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(endDate))) return true;
+  const bne = new Date(Date.now() + 10 * 3600 * 1000);
+  return bne.toISOString().slice(0, 10) > String(endDate);
+}
+
+// The "was" always comes from the package's own priceFrom, never from the promo,
+// so a price rise can't leave a fossil strike-through behind. nowPrice wins over
+// percentOff on a single package (she typed an exact number, she means it); for
+// "all" only a percentage makes sense, so one dollar figure can't be smeared
+// across four different packages.
+function promoPriceFor(pkg, p) {
+  if (!pkg) return null;
+  const was = Number(pkg.priceFrom);
+  if (!Number.isFinite(was) || was <= 0) return null;
+  let now;
+  if (p.packageId !== 'all' && Number(p.nowPrice) > 0) now = Math.round(Number(p.nowPrice));
+  else if (Number(p.percentOff) > 0) now = Math.round(was * (1 - Number(p.percentOff) / 100));
+  else return null;
+  // A "now" that isn't below the "was" is not a discount, and dressing it up as
+  // one is the kind of thing the ACL has opinions about. Draw nothing instead.
+  if (!(now > 0) || now >= was) return null;
+  return { was, now };
+}
+
+// Patch a card that's already in the DOM rather than re-rendering the grid, so
+// the promo can never become a second place that has to know how to draw a
+// package card.
+function patchPkgCard(card, price, badgeLabel) {
+  const box = card.querySelector('.pkg-price');
+  const num = box && box.querySelector('.pkg-price-num');
+  if (!box || !num) return;
+  const was = document.createElement('s');
+  was.className = 'pkg-price-was';
+  was.textContent = currencyAU(price.was);
+  box.insertBefore(was, num);
+  num.textContent = currencyAU(price.now);
+  if (badgeLabel) {
+    const b = document.createElement('span');
+    // The gold card already wears "Most picked" in the top-right, so a promo
+    // badge landing on it moves to the left corner instead of sitting on top.
+    b.className = 'pkg-badge pkg-badge-promo' + (card.querySelector('.pkg-badge') ? ' is-second' : '');
+    b.textContent = badgeLabel;
+    card.prepend(b);
+  }
+}
+
+function renderPromo() {
+  // The whole body is wrapped because the renderers run as a straight sequence:
+  // anything thrown in here would take every render after it down with it, and a
+  // broken discount is not worth a blank homepage.
+  try {
+    const p = content.promo;
+    const mount = $('#promoMount');
+    if (!mount || !p || !p.enabled || promoExpired(p.endDate)) return;
+
+    // Every client-authored string goes in through createElement + textContent,
+    // the same rule as the testimonial quotes above: these words arrive from
+    // outside this repo, and text that can never be parsed as markup is a
+    // stronger guarantee than a promise that something upstream sanitised it.
+    // No .split class anywhere in here either — applySplits() rewrites .split
+    // nodes through innerHTML, which would hand that guarantee straight back.
+    const wrap = document.createElement('div');
+    wrap.className = 'container';
+
+    const banner = document.createElement('div');
+    banner.className = 'promo-banner';
+    // Safe to reveal-animate: the IO that picks up [data-reveal] is wired further
+    // down this file, long after this render runs, and the 1.5s failsafe catches
+    // it regardless. An invisible banner would be worse than an unanimated one.
+    banner.setAttribute('data-reveal', '');
+
+    if (p.badgeLabel) {
+      const badge = document.createElement('span');
+      badge.className = 'promo-badge';
+      badge.id = 'promoBadge';
+      badge.textContent = p.badgeLabel;
+      banner.appendChild(badge);
+    }
+
+    const copy = document.createElement('div');
+    copy.className = 'promo-copy';
+    const headline = document.createElement('p');
+    headline.className = 'promo-headline';
+    headline.id = 'promoHeadline';
+    headline.textContent = p.headline || '';
+    copy.appendChild(headline);
+    if (p.sub) {
+      const sub = document.createElement('p');
+      sub.className = 'promo-sub';
+      sub.id = 'promoSub';
+      sub.textContent = p.sub;
+      copy.appendChild(sub);
+    }
+    banner.appendChild(copy);
+
+    const cta = document.createElement('a');
+    cta.className = 'btn btn-primary promo-cta';
+    cta.href = '#packages';
+    cta.textContent = 'See the packages ';
+    const arrow = document.createElement('span');
+    arrow.className = 'arrow';
+    arrow.textContent = '→';
+    cta.appendChild(arrow);
+    banner.appendChild(cta);
+
+    wrap.appendChild(banner);
+    mount.replaceChildren(wrap);
+    mount.hidden = false;
+
+    // The banner is already committed above, so a nonsense packageId costs the
+    // card treatment and nothing else.
+    if (p.packageId && p.packageId !== 'none') {
+      const ids = p.packageId === 'all' ? content.packages.map(k => k.id) : [p.packageId];
+      ids.forEach(id => {
+        const card = $(`#pkgGrid article.pkg[data-pkg="${id}"]`);
+        const pkg  = content.packages.find(k => k.id === id);
+        const price = promoPriceFor(pkg, p);
+        // On "all" the banner already says it, so four identical badges would
+        // just be noise.
+        if (card && price) patchPkgCard(card, price, p.packageId === 'all' ? '' : p.badgeLabel);
+      });
+    }
+  } catch (e) {
+    /* nothing renders, everything after it still does */
+  }
+}
+
 function renderCustomBuilder() {
   const services = content.customServices;
   const mount = $('#buildMount');
@@ -962,6 +1103,7 @@ renderHero();
 renderTrust();
 renderMaintenance();
 renderPackages();
+renderPromo();          // after renderPackages() — it patches the cards it just drew
 renderCustomBuilder();
 renderWhyGracie();
 renderFeaturedWork();
